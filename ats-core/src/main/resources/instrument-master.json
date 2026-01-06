@@ -1,0 +1,62 @@
+[
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24400CE",
+    "strike_price": 24400,
+    "option_type": "CE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24400PE",
+    "strike_price": 24400,
+    "option_type": "PE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24450CE",
+    "strike_price": 24450,
+    "option_type": "CE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24450PE",
+    "strike_price": 24450,
+    "option_type": "PE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24500CE",
+    "strike_price": 24500,
+    "option_type": "CE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24500PE",
+    "strike_price": 24500,
+    "option_type": "PE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24550CE",
+    "strike_price": 24550,
+    "option_type": "CE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24550PE",
+    "strike_price": 24550,
+    "option_type": "PE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24600CE",
+    "strike_price": 24600,
+    "option_type": "CE",
+    "expiry": "2024-05-30"
+  },
+  {
+    "instrument_key": "NSE_FO|NIFTY24MAY24600PE",
+    "strike_price": 24600,
+    "option_type": "PE",
+    "expiry": "2024-05-30"
+  }
+]

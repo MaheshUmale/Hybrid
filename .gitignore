@@ -1,0 +1,11 @@
+target/
+config.properties
+.DS_Store
+*.log
+*.tmp
+*.bak
+.gradle/
+bin/
+.settings
+.classpath
+.projectNSE.json

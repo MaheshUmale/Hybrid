@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Trade Monitor</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-green: #238636;
+            --accent-red: #da3633;
+            --text-green: #3fb950;
+            --text-red: #f85149;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Utility */
+        .text-green {
+            color: var(--text-green);
+        }
+
+        .text-red {
+            color: var(--text-red);
+        }
+
+        .bg-green {
+            background-color: rgba(35, 134, 54, 0.2);
+            border: 1px solid var(--accent-green);
+        }
+
+        .bg-red {
+            background-color: rgba(218, 54, 51, 0.2);
+            border: 1px solid var(--accent-red);
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .metric-box {
+            text-align: right;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Tables */
+        .panel {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: var(--surface-color);
+            z-index: 10;
+        }
+
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Tags */
+        .tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tag.BUY {
+            background-color: rgba(35, 134, 54, 0.2);
+            color: var(--text-green);
+        }
+
+        .tag.SELL {
+            background-color: rgba(218, 54, 51, 0.2);
+            color: var(--text-red);
+        }
+
+        /* Animation */
+        @keyframes flash-green {
+            0% {
+                background-color: rgba(35, 134, 54, 0.4);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        @keyframes flash-red {
+            0% {
+                background-color: rgba(218, 54, 51, 0.4);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        .flash-up {
+            animation: flash-green 0.5s ease-out;
+        }
+
+        .flash-down {
+            animation: flash-red 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div>
+            <h2 style="margin: 0 0 5px 0;">ATS Trade Monitor</h2>
+            <div class="status-indicators">
+                <span id="connection-status">Disconnected</span>
+                <span>•</span>
+                <span id="market-time">--:--:--</span>
+                <span>•</span>
+                <span id="auction-state">ROTATION</span>
+            </div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Total Realized PnL</div>
+            <div class="metric-value" id="total-pnl">₹ 0.00</div>
+        </div>
+    </header>
+
+    <!-- Active Trades -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>ACTIVE POSITIONS (Unrealized PnL)</span>
+            <span id="active-pnl-sum" style="font-size: 0.9em; color: var(--text-secondary)">₹ 0.00</span>
+        </div>
+        <div class="table-container">
+            <table id="active-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Qty</th>
+                        <th>Entry</th>
+                        <th>LTP</th>
+                        <th>Unrealized PnL</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS Injected -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Completed Trades -->
+    <div class="panel">
+        <div class="panel-header">
+            <span>COMPLETED TRADES (History)</span>
+            <span id="trade-count" style="font-size: 0.9em; color: var(--text-secondary)">0 Trades</span>
+        </div>
+        <div class="table-container">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>Realized PnL</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS Injected -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let socket;
+        let lastLtp = {};
+
+        // DOM Elements
+        const els = {
+            status: document.getElementById('connection-status'),
+            time: document.getElementById('market-time'),
+            state: document.getElementById('auction-state'),
+            totalPnl: document.getElementById('total-pnl'),
+            activeSum: document.getElementById('active-pnl-sum'),
+            activeBody: document.querySelector('#active-table tbody'),
+            historyBody: document.querySelector('#history-table tbody'),
+            count: document.getElementById('trade-count')
+        };
+
+        function connect() {
+            socket = new WebSocket("ws://" + window.location.hostname + ":8080/ws");
+
+            socket.onopen = () => {
+                els.status.textContent = "Connected";
+                els.status.style.color = "var(--text-green)";
+            };
+
+            socket.onclose = () => {
+                els.status.textContent = "Disconnected";
+                els.status.style.color = "var(--text-red)";
+                setTimeout(connect, 2000);
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    render(data);
+                } catch (e) {
+                    console.error("Parse error", e);
+                }
+            };
+        }
+
+        function formatCurrency(num) {
+            return `₹ ${num.toFixed(2)}`;
+        }
+
+        function formatTime(ts) {
+            return new Date(ts).toLocaleTimeString('en-IN', { hour12: false });
+        }
+
+        function render(data) {
+            // Header
+            els.time.textContent = formatTime(data.timestamp);
+            els.state.textContent = data.auctionState || "ROTATION";
+
+            // Active Trades
+            let activeHtml = "";
+            let activeSum = 0;
+
+            if (data.active_trades) {
+                data.active_trades.forEach(t => {
+                    const pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+                    const side = t.side || "BUY";
+                    activeSum += t.pnl;
+
+                    // Flash effect detection
+                    let priceClass = "";
+                    if (lastLtp[t.symbol] && t.ltp > lastLtp[t.symbol]) priceClass = "flash-up";
+                    if (lastLtp[t.symbol] && t.ltp < lastLtp[t.symbol]) priceClass = "flash-down";
+                    lastLtp[t.symbol] = t.ltp;
+
+                    activeHtml += `
+                        <tr>
+                            <td>${t.symbol}</td>
+                            <td><span class="tag ${side}">${side}</span></td>
+                            <td>${t.qty}</td>
+                            <td>${t.entry.toFixed(2)}</td>
+                            <td class="${priceClass}">${t.ltp.toFixed(2)}</td>
+                            <td class="${pnlClass}" style="font-weight:bold">${formatCurrency(t.pnl)}</td>
+                            <td style="font-size:0.85em; color:var(--text-secondary)">${t.reason}</td>
+                        </tr>
+                    `;
+                });
+            }
+            els.activeBody.innerHTML = activeHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-secondary)">No active positions</td></tr>';
+            els.activeSum.textContent = formatCurrency(activeSum);
+            els.activeSum.className = activeSum >= 0 ? 'text-green' : 'text-red';
+
+            // Completed Trades
+            let historyHtml = "";
+            let totalRealized = 0;
+            let count = 0;
+
+            if (data.closed_trades) {
+                // Sort by exit time descending
+                const sorted = [...data.closed_trades].sort((a, b) => b.exitTime - a.exitTime);
+
+                sorted.forEach(t => {
+                    totalRealized += t.pnl;
+                    count++;
+                    const pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+
+                    historyHtml += `
+                        <tr>
+                            <td style="color:var(--text-secondary)">${formatTime(t.exitTime)}</td>
+                            <td>${t.symbol}</td>
+                            <td><span class="tag ${t.side}">${t.side}</span></td>
+                            <td>${t.entry.toFixed(2)}</td>
+                            <td>${t.exit.toFixed(2)}</td>
+                            <td class="${pnlClass}" style="font-weight:bold">${formatCurrency(t.pnl)}</td>
+                            <td style="font-size:0.85em; color:var(--text-secondary)">${t.reason}</td>
+                        </tr>
+                    `;
+                });
+            }
+            els.historyBody.innerHTML = historyHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-secondary)">No completed trades yet</td></tr>';
+            els.totalPnl.textContent = formatCurrency(totalRealized);
+            els.totalPnl.style.color = totalRealized >= 0 ? 'var(--text-green)' : 'var(--text-red)';
+            els.count.textContent = `${count} Trades`;
+        }
+
+        connect();
+    </script>
+</body>
+
+</html>
