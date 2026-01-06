@@ -1,3 +1,5 @@
+# Hybrid
+hybrid
 # TradingView Data Bridge - Multi-Source Redundancy System
 
 A robust Python data bridge that provides real-time market data with **three-tier redundancy** for candles, market breadth, and option chain feeds.
