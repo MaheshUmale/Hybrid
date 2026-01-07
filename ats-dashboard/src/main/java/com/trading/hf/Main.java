@@ -33,15 +33,15 @@ public class Main {
 
         VolumeBarGenerator volumeBarGenerator = new VolumeBarGenerator(volumeThreshold, barHandler);
 
-        ThetaExitGuard thetaExitGuard = new ThetaExitGuard(positionManager);
+        // ThetaExitGuard thetaExitGuard = new ThetaExitGuard(positionManager);
 
-        // Group Listeners
-        java.util.List<MarketEventListener> marketListeners = java.util.Arrays.asList(
-            indexWeightCalculator,
-            optionChainProvider,
-            volumeBarGenerator,
-            thetaExitGuard
-        );
+        // // Group Listeners
+        // java.util.List<MarketEventListener> marketListeners = java.util.Arrays.asList(
+        //     indexWeightCalculator,
+        //     optionChainProvider,
+        //     volumeBarGenerator,
+        //     thetaExitGuard
+        // );
 
         if (dashboardEnabled) {
             DashboardBridge.start(
