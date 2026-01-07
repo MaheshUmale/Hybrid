@@ -16,4 +16,4 @@ bin/
 *.pyc
 *.db
 __pycache__/*
-.env
+__pycache__/*.pyc
