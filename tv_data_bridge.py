@@ -30,6 +30,7 @@ Version: 2.0 (Multi-Source Redundancy)
 
 import time
 import json
+import argparse
 import asyncio
 import websockets
 import pandas as pd
@@ -78,11 +79,11 @@ SYMBOLS = [
     'MARUTI', 'SUNPHARMA', 'TITAN', 'ULTRACEMCO', 'WIPRO',
     'BAJFINANCE', 'ASIANPAINT', 'HCLTECH', 'NTPC', 'POWERGRID'
 ]
-PORT = 8765
 
 class TVCandleBridge:
-    def __init__(self, symbols):
+    def __init__(self, symbols, port=8765):
         self.symbols = symbols
+        self.port = port
         self.nse = NSEHistoricalAPI()
         self.tickers = [f"NSE:{s}" for s in symbols]
         self.clients = set()
@@ -396,8 +397,7 @@ class TVCandleBridge:
                         "low": row['low|1'],
                         "close": row['close|1'],
                         "volume": row['volume|1'],
-                        "vwap": row.get('VWAP|1', row['close|1']), # Fallback
-                        "delta":row['volume|1'] if row['close|1'] >= row['open|1'] else -row['volume|1']
+                        "vwap": row.get('VWAP|1', row['close|1']) # Fallback
                     },
                     "5m": {
                         "open": row['open|5'],
@@ -440,8 +440,8 @@ class TVCandleBridge:
 
     async def main_loop(self):
         """Starts the WebSocket server and concurrent tasks."""
-        async with websockets.serve(self.handler, "localhost", PORT):
-            print(f"TV Candle Bridge started on ws://localhost:{PORT}")
+        async with websockets.serve(self.handler, "localhost", self.port):
+            print(f"TV Candle Bridge started on ws://localhost:{self.port}")
             # Run broadcast and update_pcr concurrently
             await asyncio.gather(
                 self.broadcast(),
@@ -460,5 +460,9 @@ class TVCandleBridge:
             print(f"Fatal error: {e}")
 
 if __name__ == "__main__":
-    bridge = TVCandleBridge(SYMBOLS)
+    parser = argparse.ArgumentParser(description="TradingView Data Bridge")
+    parser.add_argument('--port', type=int, default=8765, help='WebSocket port to run on')
+    args = parser.parse_args()
+
+    bridge = TVCandleBridge(SYMBOLS, port=args.port)
     bridge.run()

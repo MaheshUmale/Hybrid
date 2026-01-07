@@ -24,11 +24,10 @@ import time
 # Local modules
 from backfill_trendlyne import DB as TrendlyneDB
 
-PORT = 8765
-
 class BacktestReplayEngine:
-    def __init__(self, target_date, speed=1, start_time="09:15", end_time="15:30"):
+    def __init__(self, target_date, port=8765, speed=1, start_time="09:15", end_time="15:30"):
         self.target_date = target_date
+        self.port = port
         self.speed = speed
         self.start_time = start_time
         self.end_time = end_time
@@ -227,8 +226,8 @@ class BacktestReplayEngine:
     
     async def start_server(self):
         """Start WebSocket server"""
-        async with websockets.serve(self.handle_client, "localhost", PORT):
-            print(f"[Server] Backtest Replay running on ws://localhost:{PORT}")
+        async with websockets.serve(self.handle_client, "localhost", self.port):
+            print(f"[Server] Backtest Replay running on ws://localhost:{self.port}")
             print(f"[Server] Date: {self.target_date} | Speed: {self.speed}x")
             # Wait for at least one client to connect
             print(f"[Server] Waiting for Java dashboard connection...")
@@ -256,6 +255,8 @@ if __name__ == "__main__":
                         help='Start time (HH:MM)')
     parser.add_argument('--end', type=str, default='15:30',
                         help='End time (HH:MM)')
+    parser.add_argument('--port', type=int, default=8765,
+                        help='WebSocket port to run on')
     
     args = parser.parse_args()
     
@@ -265,6 +266,7 @@ if __name__ == "__main__":
     
     engine = BacktestReplayEngine(
         target_date=args.date,
+        port=args.port,
         speed=args.speed,
         start_time=args.start,
         end_time=args.end

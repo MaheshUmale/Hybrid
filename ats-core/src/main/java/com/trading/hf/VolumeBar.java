@@ -22,6 +22,7 @@ public class VolumeBar {
         this.close = price;
         this.volume = volume;
         this.vwap = price;
+        this.cumulativeVolumeDelta = (this.close >= this.open) ? this.volume : -this.volume;
     }
 
     public void addTick(double price, long tickVolume, int side) {
@@ -44,7 +45,6 @@ public class VolumeBar {
     public void setClose(double close) { this.close = close; }
     public void setVwap(double vwap) { this.vwap = vwap; }
     public void setVolume(long volume) { this.volume = volume; }
-    public void setCumulativeVolumeDelta(double delta) { this.cumulativeVolumeDelta = delta; }
     public void setOpen(double open) { this.open = open; }
 
     public String getSymbol() {
