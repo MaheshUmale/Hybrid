@@ -9,7 +9,7 @@ bin/
 .settings
 .classpath
 .projectNSE.json
-*/pycache/*
+*/__pycache__/*
 .vscode/
 .idea/
 *.iml
