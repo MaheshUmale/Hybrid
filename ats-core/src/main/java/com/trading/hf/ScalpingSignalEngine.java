@@ -472,8 +472,7 @@ public class ScalpingSignalEngine {
             return;
         }
 
-        ScalpSignal signal = new ScalpSignal(symbol, gate, entry, sl, tp, marketTime);
-        signal.playbookScore = score;
+        ScalpSignal signal = SignalFactory.createSignal(symbol, gate, entry, sl, tp, marketTime, score);
         logger.info("[SIGNAL_DATA] Gate={}, Symbol={}, Entry={}, SL={}, TP={}, Score={}, Time={}", gate, symbol, entry, sl, tp, score, marketTime);
         System.out.println(String.format("[SIGNAL_DATA] Gate=%s, Symbol=%s, Entry=%.2f, SL=%.2f, TP=%.2f, Score=%.2f, Time=%d", gate, symbol, entry, sl, tp, score, marketTime));
         

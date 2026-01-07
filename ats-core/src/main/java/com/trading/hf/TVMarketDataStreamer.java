@@ -102,12 +102,7 @@ public class TVMarketDataStreamer {
         double close = m1.get("close").getAsDouble();
         long volume = m1.get("volume").getAsLong();
         double vwap = m1.has("vwap") ? m1.get("vwap").getAsDouble() : close;
-                // Inside processCandle method
-        double delta = m1.has("delta") ? m1.get("delta").getAsDouble() : 0.0;
-        if (delta == 0.0) {
-            // Fallback logic: assume all volume is buy if close >= open, else sell
-            delta = (close >= open) ? volume : -volume;
-        }   
+
         // Map to internal symbol format
         String prefix = (symbol.equals("NIFTY") || symbol.equals("BANKNIFTY")) ? "NSE_INDEX|" : "NSE_EQ|";
         String fullSymbol = prefix + symbol;
@@ -124,8 +119,6 @@ public class TVMarketDataStreamer {
         bar.setLow(low);
         bar.setClose(close);
         bar.setVwap(vwap);
-        System.out.println("symbol :"+fullSymbol +"Setting cumulative volume delta: " + delta);
-        bar.setCumulativeVolumeDelta(delta); // Ensure VolumeBar has this setter
         
         if (data.has("pcr")) {
             bar.setPcr(data.get("pcr").getAsDouble());
