@@ -14,7 +14,6 @@ public class LocalBacktestRunner {
         ScalpingSignalEngine scalpingSignalEngine = new ScalpingSignalEngine(positionManager, optionChainProvider, signalEngine, true);
 
         InstrumentMaster instrumentMaster = new InstrumentMaster("instrument-master.json");
-        IndexWeightCalculator indexWeightCalculator = new IndexWeightCalculator("IndexWeights.json", instrumentMaster);
         MarketBreadthEngine marketBreadthEngine = new MarketBreadthEngine();
 
         java.util.function.Consumer<VolumeBar> barHandler = bar -> {
