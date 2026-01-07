@@ -15,3 +15,5 @@ bin/
 *.iml
 *.pyc
 *.db
+__pycache__/*
+.env
