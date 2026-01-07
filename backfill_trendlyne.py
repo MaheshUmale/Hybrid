@@ -9,6 +9,18 @@ import os
 import json
 from datetime import datetime, timedelta, date
 
+# Upstox SDK
+try:
+    import upstox_client
+    from upstox_client.rest import ApiException
+    import config
+    UPSTOX_AVAILABLE = True
+except ImportError:
+    UPSTOX_AVAILABLE = False
+    print("[WARN] Upstox SDK not found. Option Chain will rely on Trendlyne only.")
+    
+from SymbolMaster import MASTER as SymbolMaster
+
 # ==========================================================================
 # 1. DATABASE LAYER (SQLite)
 # ==========================================================================
@@ -197,6 +209,7 @@ class OptionDatabase:
 
 # Keep a cache to avoid repeated API calls
 STOCK_ID_CACHE = {}
+EXPIRY_CACHE = {}  # Cache for expiry dates
 DB = OptionDatabase()
 
 def get_stock_id_for_symbol(symbol):
@@ -285,6 +298,183 @@ def backfill_from_trendlyne(symbol, stock_id, expiry_date_str, timestamp_snapsho
     except Exception as e:
         print(f"[ERROR] Fetch {symbol} @ {timestamp_snapshot}: {e}")
         return False
+
+    except Exception as e:
+        print(f"[ERROR] Fetch {symbol} @ {timestamp_snapshot}: {e}")
+        return False
+
+def fetch_live_snapshot_upstox(symbol):
+    """
+    Fetches live option chain from Upstox Primary API and saves to DB.
+    Returns: list of dicts (chain details) or None if failed.
+    """
+    if not UPSTOX_AVAILABLE or not hasattr(config, 'ACCESS_TOKEN'):
+        return None
+
+    try:
+        # 1. Resolve Instrument Key (e.g. NSE_INDEX|Nifty 50)
+        # SymbolMaster usually returns NSE_INDEX|Nifty 50 for NIFTY
+        # But we need to be sure about the underlying key expected by Option Chain API
+        # The API expects 'NSE_INDEX|Nifty 50' or 'NSE_INDEX|Nifty Bank'
+        
+        instrument_key = None
+        if symbol == "NIFTY": instrument_key = "NSE_INDEX|Nifty 50"
+        elif symbol == "BANKNIFTY": instrument_key = "NSE_INDEX|Nifty Bank"
+        else:
+            # For stocks, we need the underlying key
+            # Attempt to use SymbolMaster but might need verifying format
+             k = SymbolMaster.get_upstox_key(symbol)
+             if k: instrument_key = k
+
+        if not instrument_key:
+            return None
+
+        # 2. Get Expiry
+        # We need a valid expiry date. 
+        # Upstox API requires 'expiry_date' parameter.
+        # Check cache or fetch instrument details?
+        # Creating a helper to get expiry is complex without downloading master again or using metadata API.
+        # Fallback: Use the cached expiry from Trendlyne logic if available, or try to derive it?
+        # Actually, for the new `get_put_call_option_chain`, expiry IS required.
+        
+        # Strategy: Use Trendlyne expiry logic (already robust) to get the date string
+        # Then feed it to Upstox.
+        expiry = EXPIRY_CACHE.get(symbol)
+        if not expiry:
+             stock_id = get_stock_id_for_symbol(symbol)
+             if stock_id:
+                 # Quick fetch of expiry via Trendlyne API (lightweight)
+                 try:
+                     expiry_url = f"https://smartoptions.trendlyne.com/phoenix/api/fno/get-expiry-dates/?mtype=options&stock_id={stock_id}"
+                     resp = requests.get(expiry_url, timeout=5)
+                     ex_list = resp.json().get('body', {}).get('expiryDates', [])
+                     if ex_list:
+                         expiry = ex_list[0]
+                         EXPIRY_CACHE[symbol] = expiry
+                 except: pass
+        
+        if not expiry:
+            return None
+
+        # 3. Call Upstox API
+        configuration = upstox_client.Configuration()
+        configuration.access_token = config.ACCESS_TOKEN
+        api_client = upstox_client.ApiClient(configuration)
+        api_instance = upstox_client.OptionsApi(api_client)
+
+        response = api_instance.get_put_call_option_chain(instrument_key, expiry)
+        
+        if not response or not response.data:
+            return None
+            
+        # 4. Parse Response
+        chain_data = response.data # List of objects
+        
+        total_call_oi = 0
+        total_put_oi = 0
+        details = {}
+        ts = datetime.now().strftime("%H:%M")
+        trading_date = datetime.now().strftime("%Y-%m-%d")
+
+        for item in chain_data:
+            strike = float(item.strike_price)
+            
+            # Call Data
+            ce = item.call_options.market_data
+            pe = item.put_options.market_data
+            
+            c_oi = int(ce.oi) if ce and ce.oi else 0
+            p_oi = int(pe.oi) if pe and pe.oi else 0
+            
+            # OI Change not directly in market_data usually?
+            # 'prev_oi' is available. chg = oi - prev_oi
+            c_prev = int(ce.prev_oi) if ce and ce.prev_oi else 0
+            p_prev = int(pe.prev_oi) if pe and pe.prev_oi else 0
+            
+            c_chg = c_oi - c_prev
+            p_chg = p_oi - p_prev
+            
+            total_call_oi += c_oi
+            total_put_oi += p_oi
+            
+            details[str(strike)] = {
+                'call_oi': c_oi,
+                'put_oi': p_oi,
+                'call_oi_chg': c_chg,
+                'put_oi_chg': p_chg
+            }
+
+        if total_call_oi == 0 and total_put_oi == 0:
+            return None
+            
+        pcr = round(total_put_oi / total_call_oi, 2) if total_call_oi > 0 else 1.0
+
+        # 5. Save to DB
+        aggregates = {
+            'call_oi': total_call_oi,
+            'put_oi': total_put_oi,
+            'pcr': pcr
+        }
+        
+        DB.save_snapshot(symbol, trading_date, ts, expiry, aggregates, details)
+        return DB.get_latest_chain(symbol)
+
+    except Exception as e:
+        print(f"[UPSTOX OCR FAIL] {symbol}: {e}")
+        return None
+
+def fetch_live_snapshot(symbol):
+
+    """
+    Fetches live data for symbol, saves to DB, and returns the chain.
+    Priority: Upstox -> Trendlyne.
+    """
+    # 1. Try Upstox Primary
+    upstox_chain = fetch_live_snapshot_upstox(symbol)
+    if upstox_chain:
+        # print(f"[OCR UPDATE] {symbol} via Upstox")
+        return upstox_chain
+
+    # 2. Fallback to Trendlyne
+    stock_id = get_stock_id_for_symbol(symbol)
+    if not stock_id:
+        return []
+
+    # Get Expiry (cached)
+    expiry = EXPIRY_CACHE.get(symbol)
+    # Simple validation: if expiry is in the past, refresh
+    if expiry:
+        try:
+             exp_date = datetime.strptime(expiry, "%Y-%m-%d").date()
+             if date.today() > exp_date:
+                 expiry = None
+        except:
+             expiry = None
+
+    if not expiry: 
+        try:
+             expiry_url = f"https://smartoptions.trendlyne.com/phoenix/api/fno/get-expiry-dates/?mtype=options&stock_id={stock_id}"
+             resp = requests.get(expiry_url, timeout=5)
+             expiry_list = resp.json().get('body', {}).get('expiryDates', [])
+             if expiry_list:
+                 expiry = expiry_list[0]
+                 EXPIRY_CACHE[symbol] = expiry
+        except Exception as e:
+             print(f"[WARN] Failed to fetch expiry for {symbol}: {e}")
+             pass
+    
+    if not expiry:
+        return DB.get_latest_chain(symbol)
+
+    # Timestamp
+    ts = datetime.now().strftime("%H:%M")
+    
+    # Fetch and Save
+    # This calls the existing backfill logic which SAVES to DB
+    success = backfill_from_trendlyne(symbol, stock_id, expiry, ts)
+    
+    # Return latest from DB (whether update succeeded or not, we return best available)
+    return DB.get_latest_chain(symbol)
 
 def generate_time_intervals(start_time="09:15", end_time="15:30", interval_minutes=1):
     """Generate time strings in HH:MM format with 1-minute default"""

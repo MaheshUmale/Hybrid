@@ -76,6 +76,8 @@ public class DashboardViewModel {
         public double ltp;
         public int qty;
         public double pnl;
+        public long entryTime;
+        public String strategy;
         public String reason;
     }
 
@@ -85,7 +87,9 @@ public class DashboardViewModel {
         public double entry;
         public double exit;
         public double pnl;
+        public long entryTime;
         public long exitTime;
+        public String strategy;
         public String reason;
     }
 

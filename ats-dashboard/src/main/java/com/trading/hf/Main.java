@@ -28,7 +28,7 @@ public class Main {
             auctionProfileCalculator.onVolumeBar(bar);
             signalEngine.onVolumeBar(bar);
             scalpingSignalEngine.onVolumeBar(bar);
-            if (dashboardEnabled) com.trading.hf.dashboard.DashboardBridge.onVolumeBar(bar);
+            if (dashboardEnabled) DashboardBridge.onVolumeBar(bar);
         };
 
         VolumeBarGenerator volumeBarGenerator = new VolumeBarGenerator(volumeThreshold, barHandler);
@@ -44,7 +44,7 @@ public class Main {
         );
 
         if (dashboardEnabled) {
-            com.trading.hf.dashboard.DashboardBridge.start(
+            DashboardBridge.start(
                 volumeBarGenerator,
                 signalEngine,
                 auctionProfileCalculator,
@@ -61,7 +61,9 @@ public class Main {
             String dataSource = ConfigLoader.getProperty("live.data.source", "tradingview");
             
             if ("tradingview".equalsIgnoreCase(dataSource)) {
-                tvStreamer = new TVMarketDataStreamer(barHandler, optionChainProvider, marketBreadthEngine);
+                String wsUrl = ConfigLoader.getProperty("ws.url", "ws://127.0.0.1:8765");
+                System.out.println("Connecting to TV Bridge at: " + wsUrl);
+                tvStreamer = new TVMarketDataStreamer(barHandler, optionChainProvider, marketBreadthEngine, wsUrl);
                 tvStreamer.connect();
 
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {

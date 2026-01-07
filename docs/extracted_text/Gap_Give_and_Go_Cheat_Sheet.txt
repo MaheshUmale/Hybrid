@@ -1,0 +1,61 @@
+ The Gap Give and Go Dynamics  : 
+ ●  In Play stock with a Gap Up drops sharply from the open. 
+ ○  This occurs as traders who were rewarded with the gap up in price quickly and aggressively take profits. 
+ ○  The initial move lower should be quick, but should also hold ABOVE a level of potential support like a 
+ Premarket low ,  higher time frame resistance turned support, etc. 
+ ●  A short consolidation develops as the supply from the aggressive profit-taking meets the demand from the bigger 
+ players looking to buy the stock. 
+ ○  The consolidation can vary on the time and height, but here are some guidelines: 
+ ■  Look for a minimum of a 3-minute consolidation and a maximum of a 7-minute consolidation 
+ ■  The low of the “consolidation” should be above the key support level. 
+ ●  Buyers step in with sustained demand, defending the support level and moving the stock price above the highs of the 
+ mini-consolidation 
+ ○  The buying does not have to be aggressive of f the lows, but it should be sustained 
+ ○  We are observing that the early profit-taking gave way to sustained buying pressure. 
+ ○  Real Big Players will buy through the open to get their initial position filled, giving us a move2move trade. 
+ The exact rules of ENTR Y (all rules the exact same, just inverted for a short scalp: 
+ ●  Aggressively buy on the break higher of the 1 min bar range. 
+ ○  Aggressively means paying the of fer for a long as soon as the range breaks. 
+ ○  Don’t wait for the bar to close, enter on the range breaking. 
+ The exact rules of ST OP placement: 
+ ●  Hard stop T rade - Potential of 2 attempts 
+ ○  We place our stop .02 below the low of the consolidation that 
+ was developed prior to the continuation break. 
+ ●  If we are stopped, we can re-enter if the range is broken to the upside again within 3 minutes. 
+ The exact rules of EXIT : 
+ This is a Move2Move trade, we look for 2 moves before we exit. 
+ ●  The first move is often quick and aggressive, putting us in the money fast. 
+ ●  This gives way to a slight pullback that MUST hold the highs of the mini-consolidation 
+ ○  (Ideally , it holds VW AP and the 9 EMA as well) 
+ ●  Buyers step back in and continue to take price higher , with an increased urgency 
+ from the buyers as the momentum builds. 
+ ●  We exit the position on a double bar break against our position. 
+
+
+ Factors that Increase the odds of success: 
+ ●  Increase in volume on the break of the consolidation 
+ ○  The stock is In-Play so the volume should be elevated already , but ideally we observe a visible decrease in 
+ the volume during the consolidation. 
+ ■  50% or less volume than the prior candles can be a good threshold 
+ ●  Market trending in the direction of the trade you are making 
+ ○  If SPY , QQQ, and IWM are trending higher , this trade can be extra good. 
+ ■  If the sector is trending similarly , it can help our trade as there is large buying across the sector . 
+ Factors that Decrease the odds of success: 
+ ●  Over-extension of the initial move from the open. 
+ ○  If the move lower from the open closes more than 50% of the gap prior to the mini-consolidation starting, we 
+ are very careful with this trade. 
+ ●  Multiple attempts higher prior to the consolidation starting. 
+ ○  We don’t want to see the buyers stepping in multiple times and being met with more sellers each time; we 
+ don't want to be trading against slow , sustained selling prior to the mini-consolidation starting. 
+ ●  Fighting a bigger-picture trend on the day . 
+ ○  Like the factor that increases the probability , we don’t want to fight larger orders potentially against this 
+ trade. 
+ The ideal times of day: 
+ ●  Opening drive trade (see it start from the open and trigger before 9:45 am EST) 
+ When do we avoid the Gap Give and Go entirely? 
+ ●  We will never make this trade when the mini-consolidation is below a key support level. 
+ ●  We will never make this trade when the size of the mini-consolidation is more than 50% of the initial opening range 
+ move that went lower from the gap open. 
+ ○  This means the mini-consolidation is not really defined by a range, it’ s just moving sporadically all over the 
+ place, like a plastic bag caught in the wind. 
+ ○  We will never make this trade on a stock that is not In-Play 

@@ -1,0 +1,10 @@
+{
+  "pdf": "Technical-Analysis-Range-Break-Trading-Cheat-Sheet.pdf",
+  "strategy": "Range Break Trading (General)",
+  "entry": "Entry on initial breakout above range resistance (or below support for shorts).",
+  "stop": "Stop placed 0.02 below support (for long); measured stop from range height possible.",
+  "target": "Measured-move target; default 2:1 R:R.",
+  "confirmations": ["Volume increase at breakout","Decrease in volume during range formation"],
+  "trailing": "Trail to breakout pivot or VWAP/EMA on retracement.",
+  "notes": "General-purpose gate; good fallback strategy."
+}

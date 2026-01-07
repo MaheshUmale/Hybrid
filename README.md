@@ -53,10 +53,11 @@ The bridge will:
 - Initialize SymbolMaster (downloads Upstox instrument master)
 - Start WebSocket server on `ws://localhost:8765`
 - Begin broadcasting:
-  - `candle_update` (every 60s)
-  - `market_breadth` (every 60s)
-  - `option_chain` (every 60s)
-  - `pcr_update` (every 60s)
+            - `candle_update` (every 60s) — note: for index symbols (`NIFTY`, `BANKNIFTY`) the `1m` candle payload includes a `pcr` field
+            - `market_breadth` (every 60s)
+            - `option_chain` (every 60s)
+            
+            The Backtest Replay (`backtest_replay.py`) additionally sends explicit `pcr_update` messages for indices.
 
 ### 2. Connect from Java Client
 ```java
@@ -117,6 +118,26 @@ streamer.connect();
 
 #### Trendlyne Backfill
 The SQLite database automatically stores:
+
+## Recent Implementation Updates (engine & risk fixes)
+
+I recently implemented a set of core risk/sizing and strategy enhancements in the Java engine (`ats-core`). These changes are intended to fix incorrect risk sizing seen in earlier runs and to align the engine with the PlayBook rules.
+
+Key points:
+- Risk-based sizing (quantity = floor(risk.per.trade / SLdistance)), rounded to instrument lot size, capped by `max.position.qty`.
+- VWAP + 9 EMA gate implemented with N-bar consolidation measured-move SL/TP.
+- Partial Take-Profit: configurable percent of position closed on first TP; remaining leg is trailed and assigned a new TP.
+- EMA/VWAP-based trailing SL and improved observability (`SIZING`, `POSITION_CREATED`, `PARTIAL_TP`, `TRAIL_SL_UPDATED`).
+- Option mapping heuristics: ATM mapping, OI wall detection and PCR-based scaling.
+
+Files added/changed (core):
+- `ats-core/src/main/java/com/trading/hf/ScalpingSignalEngine.java`
+- `ats-core/src/main/java/com/trading/hf/TechnicalIndicators.java`
+- `ats-core/src/main/java/com/trading/hf/Position.java`
+- `ats-core/src/main/java/com/trading/hf/PositionManager.java`
+- `config.properties` (defaults added at repository root)
+
+See `docs/IMPLEMENTATION_README.md` for details and run instructions.
 - All option chain snapshots (1-min resolution)
 - PCR historical data (daily aggregates)
 - Market breadth records
@@ -183,7 +204,7 @@ python backtest_replay.py --date 2026-01-05 --speed 5
 - `--end`: End time (HH:MM, default: 15:30).
 
 ### 3. Connect Java Dashboard
-Point your Java dashboard to `ws://localhost:8765`. It will receive `candle_update`, `option_chain`, and `pcr_update` messages exactly like the live system.
+Point your Java dashboard to `ws://localhost:8765`. It will receive `candle_update` and `option_chain` messages from the live bridge; the replay engine also emits explicit `pcr_update` messages for index PCR snapshots during backtests.
 
 ## 🛡️ Error Handling
 

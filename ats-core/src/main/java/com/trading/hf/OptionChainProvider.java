@@ -16,12 +16,15 @@ public class OptionChainProvider implements MarketEventListener {
     private final Map<String, MarketEvent> optionState = new ConcurrentHashMap<>();
     private final Map<String, Double> previousOi = new ConcurrentHashMap<>();
     private final Map<String, Double> indexSpots = new ConcurrentHashMap<>();
+    private final Map<String, Double> indexPcr = new ConcurrentHashMap<>();
+    private final Map<String, Double> prevIndexPcr = new ConcurrentHashMap<>();
     private final AtomicReference<Double> spotPrice = new AtomicReference<>(0.0);
     private static final int STRIKE_DIFFERENCE = 50;
     private static final int BANKNIFTY_STRIKE_DIFF = 100;
     private static final int WINDOW_SIZE = 2; // ATM +/- 2 strikes
     
     private final PositionManager positionManager;
+    private final AtomicReference<List<OptionChainDto>> injectedChain = new AtomicReference<>(List.of());
 
     public OptionChainProvider(PositionManager positionManager) {
         this.positionManager = positionManager;
@@ -58,10 +61,30 @@ public class OptionChainProvider implements MarketEventListener {
         }
     }
 
+    public void updateIndexPcr(String symbol, double pcr) {
+        if (symbol == null) return;
+        if (symbol.startsWith("NSE_INDEX|")) {
+            Double current = indexPcr.get(symbol);
+            if (current != null) prevIndexPcr.put(symbol, current);
+            indexPcr.put(symbol, pcr);
+            logger.debug("Index PCR updated: {} -> {} (prev: {})", symbol, pcr, current);
+        }
+    }
+
+    public double getIndexPcrChange(String symbol) {
+        Double current = indexPcr.get(symbol);
+        Double prev = prevIndexPcr.get(symbol);
+        if (current == null || prev == null || prev == 0) return 0.0;
+        return ((current - prev) / prev) * 100.0;
+    }
+
+    public double getIndexPcr(String symbol) {
+        return indexPcr.getOrDefault(symbol, 1.0);
+    }
+
     public void updateFromBridge(List<OptionChainDto> chain) {
         if (chain == null || chain.isEmpty()) return;
-        // Pre-sorted and pre-calculated in Python, just store or signal
-        // For now, we can log or trigger events if needed
+        injectedChain.set(chain);
         logger.debug("Option Chain Window injected from bridge (size: {})", chain.size());
     }
 
@@ -107,7 +130,25 @@ public class OptionChainProvider implements MarketEventListener {
         
         String type = "BUY".equals(side) ? "CE" : "PE";
         
-        // 1. Try Real Data first
+        // 1. Try Injected Chain from Bridge (High Priority in Live)
+        List<OptionChainDto> injected = injectedChain.get();
+        if (injected != null && !injected.isEmpty()) {
+            OptionChainDto match = injected.stream()
+                .filter(d -> d.getStrike() == atmStrike && type.equals(d.getType()))
+                .findFirst()
+                .orElse(null);
+            
+            if (match != null && match.getLtp() > 0) {
+                // Construct a symbolic name for the bridge-provided option
+                String baseName = indexSymbol.replace("NSE_INDEX|", "").replace(" ", "").toUpperCase();
+                if (baseName.equals("NIFTY50")) baseName = "NIFTY";
+                String symbol = "NSE_OPT|" + baseName + atmStrike + type;
+                logger.debug("Found ATM option in injected chain: {} @ {}", symbol, match.getLtp());
+                return new OptionData(symbol, match.getLtp());
+            }
+        }
+
+        // 2. Try Real Tick Data (fallback)
         OptionData realOpt = optionState.values().stream()
             .filter(e -> {
                  SymbolUtil.OptionSymbol os = SymbolUtil.parseOptionSymbol(e.getSymbol());
@@ -119,7 +160,7 @@ public class OptionChainProvider implements MarketEventListener {
             
         if (realOpt != null && realOpt.ltp > 0) return realOpt;
         
-        // 2. Return Synthetic using the same realistic model
+        // 3. Return Synthetic using the same realistic model
         String baseName = indexSymbol.replace("NSE_INDEX|", "").replace(" ", "").toUpperCase();
         if (baseName.equals("NIFTY50")) baseName = "NIFTY";
         if (baseName.equals("BANKNIFTY")) baseName = "BANKNIFTY";
@@ -129,11 +170,18 @@ public class OptionChainProvider implements MarketEventListener {
         double intrinsic = type.equals("CE") ? (spot - atmStrike) : (atmStrike - spot);
         double synthPrice = Math.max(5.0, intrinsic + premium);
         
+        logger.debug("Returning SYNTHETIC ATM option {} @ {} for index {} side={}", synthSymbol, synthPrice, indexSymbol, side);
         return new OptionData(synthSymbol, synthPrice);
     }
 
     public List<OptionChainDto> getOptionChainWindow() {
-        // ...Existing logic remains for local fallback if needed...
+        // Priority 1: Use injected chain from bridge (Python processed)
+        List<OptionChainDto> injected = injectedChain.get();
+        if (injected != null && !injected.isEmpty()) {
+            return injected;
+        }
+
+        // Priority 2: Local calculation fallback
         double currentSpot = spotPrice.get();
         if (currentSpot == 0.0) {
             return List.of();
@@ -141,7 +189,7 @@ public class OptionChainProvider implements MarketEventListener {
 
         int atmStrike = (int) (Math.round(currentSpot / STRIKE_DIFFERENCE) * STRIKE_DIFFERENCE);
 
-        return optionState.values().stream()
+        java.util.List<OptionChainDto> window = optionState.values().stream()
                 .map(event -> {
                     SymbolUtil.OptionSymbol optionSymbol = SymbolUtil.parseOptionSymbol(event.getSymbol());
                     if (optionSymbol == null) return null;
@@ -157,11 +205,12 @@ public class OptionChainProvider implements MarketEventListener {
                         previousOi.put(event.getSymbol(), currentOi);
 
                         return new OptionChainDto(
-                                strike,
-                                optionSymbol.getType(),
-                                event.getLtp(),
-                                oiChangePercent,
-                                "NEUTRAL"
+                            strike,
+                            optionSymbol.getType(),
+                            event.getLtp(),
+                            event.getOi(),
+                            oiChangePercent,
+                            "NEUTRAL"
                         );
                     }
                     return null;
@@ -169,5 +218,37 @@ public class OptionChainProvider implements MarketEventListener {
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(OptionChainDto::getStrike))
                 .collect(Collectors.toList());
+
+        // Log window contents for debugging
+        logger.debug("Computed option chain window around ATM (size={})", window.size());
+        for (OptionChainDto dto : window) {
+            logger.debug("WindowEntry strike={} type={} ltp={} oi={} oiChangePct={}", dto.getStrike(), dto.getType(), dto.getLtp(), dto.getOi(), dto.getOiChangePercent());
+        }
+
+        return window;
+    }
+    public double getPcrOfChangeInOi() {
+        List<OptionChainDto> window = getOptionChainWindow();
+        if (window == null || window.isEmpty()) return 1.0;
+
+        double putChangeTotal = 0;
+        double callChangeTotal = 0;
+
+        for (OptionChainDto dto : window) {
+            // OptionChainDto already has ltp, oi, and oiChangePercent. 
+            // We need absolute change = (oi * (oiChangePercent/100)) / (1 + (oiChangePercent/100)) ??
+            // Actually, we should store absolute change in the DTO or track it here.
+            // Let's assume we want to know if Put OI is growing faster than Call OI today.
+            
+            double deltaOi = dto.getOi() * (dto.getOiChangePercent() / 100.0);
+            if ("PE".equals(dto.getType())) {
+                putChangeTotal += deltaOi;
+            } else {
+                callChangeTotal += deltaOi;
+            }
+        }
+
+        if (callChangeTotal == 0) return putChangeTotal > 0 ? 10.0 : 1.0;
+        return Math.max(0.1, putChangeTotal / callChangeTotal);
     }
 }

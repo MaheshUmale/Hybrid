@@ -294,11 +294,11 @@ class TVCandleBridge:
                      continue
                 
             if upstox_candles:
-                 print(f"[UPSTOX FALLBACK] Recovered {len(upstox_candles)} symbols.")
+                 print(f"[UPSTOX PRIMARY] Recovered {len(upstox_candles)} symbols.")
             return upstox_candles
 
         except Exception as e:
-            print(f"[CRITICAL] Upstox Fallback Failed: {e}")
+            print(f"[CRITICAL] Upstox Primary Failed: {e}")
             return []
 
     def _fetch_candles_logic(self, use_cookies=True):

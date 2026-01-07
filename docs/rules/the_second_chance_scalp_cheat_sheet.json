@@ -1,0 +1,10 @@
+{
+  "pdf": "the_second_chance_scalp_cheat_sheet.pdf",
+  "strategy": "The Second Chance Scalp",
+  "entry": "Enter on a second breakout after a failed first attempt (retest + successful break).",
+  "stop": "Hard stop below the consolidation/retest low.",
+  "target": "Measured move; conservative TP settings recommended.",
+  "confirmations": ["Volume on second break","Clear retrace and fresh momentum"],
+  "trailing": "Trail to EMA/VWAP; partial TP options recommended.",
+  "notes": "Implement re-entry timing and cooldown to avoid rapid re-entries."
+}

@@ -1,0 +1,10 @@
+{
+  "pdf": "the_rubberband_scalp_cheat_sheet.pdf",
+  "strategy": "Rubberband Scalp",
+  "entry": "Enter on rebound after a pullback to VWAP/EMA with a quick reversal candle.",
+  "stop": "Place stop below the pullback low (measured).",
+  "target": "Measured move; conservative TP 1.5-2x risk.",
+  "confirmations": ["Quick reversal candle","Increasing volume on rebound"],
+  "trailing": "Trail to VWAP/EMA or fixed tick trail.",
+  "notes": "Detect small pullback and minimum rebound candle size."
+}

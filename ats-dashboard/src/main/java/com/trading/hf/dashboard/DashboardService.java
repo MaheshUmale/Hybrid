@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import com.trading.hf.ConfigLoader;
 
 public class DashboardService {
     private Javalin app;
@@ -31,7 +32,7 @@ public class DashboardService {
             });
 
             config.staticFiles.add("/public");
-        }).start(7070);
+        }).start(Integer.parseInt(ConfigLoader.getProperty("dashboard.port", "7070")));
 
         app.ws("/data", ws -> {
             ws.onConnect(ctx -> {

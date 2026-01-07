@@ -1,0 +1,10 @@
+{
+  "pdf": "back$ide_cheat_sheet.pdf",
+  "strategy": "Back-Ide / Range Break",
+  "entry": "Enter on breakout of defined micro-range; enter immediately (do not wait for bar close).",
+  "stop": "Hard stop ~0.02 below consolidation low or recent swing low.",
+  "target": "Measured move (consolidation height * 1-2) or default 2:1 R:R.",
+  "confirmations": ["VWAP alignment","Rising volume","Avoid when OI shows opposing pressure"],
+  "trailing": "Optional: trail to VWAP or 9EMA; otherwise use hard stop.",
+  "notes": "Emphasizes VWAP and OI; visual rules may be image annotated in PDF images."
+}

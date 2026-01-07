@@ -1,0 +1,32 @@
+ The Dynamics of the Base Hit Scalp Trade: 
+ ●  In Play stock putting in a range. It can be tricky to trade the ranges at times, especially when we are anxious, 
+ are excited, are in an anticipatory mindset. 
+ ○  The anticipatory mindset often manifests itself through one, or a series of invetned trades. 
+ ■  Trades that on the surface seem to have decent ideas behind them, but are not grounded in 
+ real edge from the perspective of 
+ ●  A clearly deﬁned, appropriate stop 
+ ●  A speciﬁc entry trigger with a reason for that entry 
+ ●  A distinct exit strategy (reason2sell) that tells us when the “meat” of the move is done 
+ ●  For this Base Hit Scalp, we ﬁrst dentify the range turning into a consolidation 
+ ○  The price action compresses and the MACD goes relatively FLAT for a period of 3-15 minutes 
+ ●  Second, we observe a break of the range, and an expansion of the Fast and Slow MacD lines. 
+ ●  Third, we observe the price retracement that occurs and look for the FAST MACD to dip below the SLOW 
+ MACD. 
+ The exact rules of ENTRY (all rules the exact same, just inverted for a short scalp: 
+ ●  When the FAST MACD moves back above the SLOW MACD, and BOTH are above the 0 line, we enter long 
+ ○  We dont have to be super aggressive here, we can often use a mid-point entry (between bid and ask) 
+ The exact rules of STOP placement: 
+ ●  Hard stop Trade - One and Done Trade 
+ ○  Stop is placed .02 below the retracement lows. 
+ The exact rules of EXIT: 
+ ●  This is a Scalp Trade. We use MACD as a guide. 
+ ○  We stay in our position until the FAST MACD crosses back BELOW the Slow MACD 
+ ○  When this happens, we exit our position entirely and move on. 
+ Set Ups where we look for this Scalp Trade: 
+ ●  Gap out of Range 
+ ●  Volatility in Range 
+ ●  Trending Day to the Upside 
+ ●  Failed Break Down 
+ ●  Gap Down into key support 
+ ●  Day 2 following intraday reversal 
+ ** All of this can be reversed for short trades, just ﬂip the charts! 

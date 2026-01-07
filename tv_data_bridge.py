@@ -38,10 +38,19 @@ from tradingview_screener import Query, col
 from NSEAPICLient import NSEHistoricalAPI
 from SymbolMaster import MASTER as SymbolMaster
 
+# Yahoo Finance Import (Level 3 Fallback)
 try:
-    from backfill_trendlyne import DB as TrendlyneDB
+    import yfinance as yf
+    YAHOO_AVAILABLE = True
+except ImportError:
+    YAHOO_AVAILABLE = False
+    print("[WARN] yfinance not found. Level 3 Candle Fallback disabled.")
+
+try:
+    from backfill_trendlyne import DB as TrendlyneDB, fetch_live_snapshot
 except ImportError:
     TrendlyneDB = None
+    fetch_live_snapshot = None
     print("[WARN] could not import backfill_trendlyne. Option chain data will be missing.")
 
 # Upstox SDK Imports
@@ -81,23 +90,31 @@ class TVCandleBridge:
     async def broadcast_option_chain(self):
         """
         Periodically broadcasts Option Chain snapshots from Trendlyne DB.
+        Also triggers a live fetch-and-save to ensure history is recorded.
         """
+        loop = asyncio.get_running_loop()
         while True:
-            if TrendlyneDB and self.clients:
+            if TrendlyneDB and self.clients and fetch_live_snapshot:
                 for sym in ["NIFTY", "BANKNIFTY"]:
-                    chain = TrendlyneDB.get_latest_chain(sym)
-                    if chain:
-                        # Map to internal format
-                        full_sym = "NSE_INDEX|Nifty 50" if sym == "NIFTY" else "NSE_INDEX|Nifty Bank"
-                        msg = {
-                            "type": "option_chain",
-                            "symbol": full_sym,
-                            "timestamp": int(time.time() * 1000),
-                            "data": chain
-                        }
-                        await asyncio.gather(*[client.send(json.dumps(msg)) for client in self.clients], return_exceptions=True)
+                    try:
+                        # run_in_executor to avoid blocking main loop with requests
+                        # fetch_live_snapshot saves to DB and returns the chain
+                        chain = await loop.run_in_executor(None, fetch_live_snapshot, sym)
+                        
+                        if chain:
+                            # Map to internal format
+                            full_sym = "NSE_INDEX|Nifty 50" if sym == "NIFTY" else "NSE_INDEX|Nifty Bank"
+                            msg = {
+                                "type": "option_chain",
+                                "symbol": full_sym,
+                                "timestamp": int(time.time() * 1000),
+                                "data": chain
+                            }
+                            await asyncio.gather(*[client.send(json.dumps(msg)) for client in self.clients], return_exceptions=True)
+                    except Exception as e:
+                        print(f"[OCR ERROR] {sym}: {e}")
             
-            await asyncio.sleep(10) # Update chain every 10 seconds
+            await asyncio.sleep(60) # Update chain every 60 seconds (1-min resolution)
 
     async def broadcast_market_breadth(self):
         """
@@ -223,8 +240,62 @@ class TVCandleBridge:
                 # FALLBACK LEVEL 2: TradingView Public (no cookies)
                 return self._fetch_candles_logic(use_cookies=False)
             except Exception as fe:
-                print(f"[TV FALLBACK ERROR] {fe}. All sources exhausted.")
-                return []
+                print(f"[TV FALLBACK ERROR] {fe}. Trying Yahoo Finance...")
+                
+                # FALLBACK LEVEL 3: Yahoo Finance
+                try:
+                    return self._fetch_candles_yahoo()
+                except Exception as ye:
+                    print(f"[YAHOO FALLBACK ERROR] {ye}. All sources exhausted.")
+                    return []
+
+    def _fetch_candles_yahoo(self):
+        """FALLBACK LEVEL 3: Yahoo Finance (most basic, 15m delay often)."""
+        if not YAHOO_AVAILABLE:
+            return []
+            
+        print("[FALLBACK] Fetching candles from Yahoo Finance...")
+        candles = []
+        ts = int(time.time() // 60 * 60 * 1000)
+        
+        # Batch fetching is better but iterating for now to map symbols
+        # Format: RELIANCE.NS, ^NSEI (Nifty), ^NSEBANK (Bank Nifty)
+        
+        for sym in self.symbols:
+            y_sym = f"{sym}.NS"
+            if sym == "NIFTY": y_sym = "^NSEI"
+            if sym == "BANKNIFTY": y_sym = "^NSEBANK"
+            
+            try:
+                ticker = yf.Ticker(y_sym)
+                # Fetch 1 day, 1m interval
+                df = ticker.history(period="1d", interval="1m")
+                if df.empty: continue
+                
+                last_row = df.iloc[-1]
+                
+                ltp = float(last_row['Close'])
+                c_data = {
+                    "symbol": sym, "timestamp": ts,
+                    "1m": {
+                        "open": float(last_row['Open']), 
+                        "high": float(last_row['High']), 
+                        "low": float(last_row['Low']), 
+                        "close": ltp, 
+                        "volume": int(last_row['Volume']),
+                        "vwap": ltp 
+                    },
+                    "5m": { # Yahoo raw doesn't give 5m easily mixed, so replicate 1m or approx
+                         "open": float(last_row['Open']), "high": float(last_row['High']), 
+                         "low": float(last_row['Low']), "close": ltp, "volume": int(last_row['Volume'])
+                    },
+                    "pcr": self.pcr_data.get(sym, 1.0)
+                }
+                candles.append(c_data)
+            except:
+                pass
+                
+        return candles
 
     def fetch_candles_upstox_primary(self):
         """PRIMARY: Fetch latest intraday candles using Upstox HistoryV3 API."""
@@ -294,11 +365,11 @@ class TVCandleBridge:
                      continue
                 
             if upstox_candles:
-                 print(f"[UPSTOX FALLBACK] Recovered {len(upstox_candles)} symbols.")
+                 print(f"[UPSTOX PRIMARY] Recovered {len(upstox_candles)} symbols.")
             return upstox_candles
 
         except Exception as e:
-            print(f"[CRITICAL] Upstox Fallback Failed: {e}")
+            print(f"[CRITICAL] Upstox Primary Failed: {e}")
             return []
 
     def _fetch_candles_logic(self, use_cookies=True):
@@ -326,6 +397,7 @@ class TVCandleBridge:
                         "close": row['close|1'],
                         "volume": row['volume|1'],
                         "vwap": row.get('VWAP|1', row['close|1']), # Fallback
+                        "delta":row['volume|1'] if row['close|1'] >= row['open|1'] else -row['volume|1']
                     },
                     "5m": {
                         "open": row['open|5'],

@@ -176,10 +176,10 @@ class BacktestDataCollector:
         
         for symbol in ['NIFTY', 'BANKNIFTY']:
             try:
-                # Use TradingView Scanner for volume data
+                # Use TradingView   for volume data
                 # Note: This might not give minute-level historical, so this is a placeholder
                 # In practice, we might need tvdatafeed or accept zero-volume for indices
-                
+                # [FIXME] https://github.com/rongardF/tvdatafeed USE This for NIFTY BANKNIFTY 1 minute-level data candles with volume
                 print(f"  [INFO] TradingView minute-level history not available via screener")
                 print(f"  [FALLBACK] Using zero-volume for {symbol} indices")
                 

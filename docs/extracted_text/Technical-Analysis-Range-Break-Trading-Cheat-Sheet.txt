@@ -1,0 +1,57 @@
+ Range Break Trading 
+ Range break trading is a trading strategy  used by traders to identify and capitalize on price movements that break out of a 
+ predefined trading range within a specific timeframe. Intraday, we use range break trading as a way to capitalize on periods of balance 
+ in the price action for “In Play” stocks by trading the change in the price action that creates excessive moves out of that balance. The 
+ concept hinges on the idea that financial instruments tend to move within certain price ranges or channels during a trading session, as 
+ they “reset” and significant moves or trends can start when prices break out of these ranges. 
+ Start by appropriately identifying a range: 
+ Establish Highs and Lows 
+ The first step is to identify the highest and lowest price points of an asset during a specific period, which will 
+ serve as the range's boundaries. For intraday trading, this period could be the previous trading day, the first 
+ few hours of the current trading day, or any period of price action bound by the highs and the lows of the 
+ range which create Horizontal Support and Resistance Levels. 
+ Horizontal Support and Resistance Levels 
+ Once the high and low points are established, horizontal lines can be drawn on the price chart to 
+ represent these levels, which act as the range's support (low) and resistance (high) levels - These 
+ levels become increasingly important based on the number of “tests” or “touches” of the horizontal 
+ support and resistance levels AND the response of price to those levels 
+ Early in the range being established, we look for fast moves away from that level 
+ During the middle of the range we look for slower moves away from those levels 
+ Late in the range we look for fast moves to the levels and then methodical moves away from those levels. 
+ Timeframes For Range Break Trading 
+ shorter timeframes like 15-minute, 30-minute, or 1-hour charts are often used to identify trading ranges, as they 
+ provide a granular view of price movements within the trading day. Ranges can form quickly in periods of elevated 
+ volatility - as little as 10 minutes, but generally, we look for 20 minutes to 1 hour and 15 minutes for a good range to 
+ be established. 
+ Volume Analysis:  Analyzing trading volume can provide additional insights. For instance, a decrease in volume 
+ during the formation of the range followed by a significant increase in volume at the breakout point can validate the 
+ range break. 
+
+
+ Once a range has been identified, traders look for signals that the price is breaking out of this range, which could 
+ indicate the start of a new trend. These breakouts can occur in either direction - upwards (bullish) or downwards 
+ (bearish). 
+ Bullish Breakout:  Occurs when the price moves above the range's resistance level. Traders might enter a long position, anticipating 
+ further upward movement. 
+ Bearish Breakout:  Occurs when the price drops below the range's support level. Traders might take a short position, 
+ expecting the price to continue falling. 
+ Examples of Trades that can be taken from a range break: 
+ Range break Trade: 
+ Stop  is placed .02 below the support level for a bullish  range break to the upside 
+ or .02 above the resistance level for a bearish range break to the downside 
+ Entry  is on the initial break of the range, we should  observe a clear change in the price action as the range 
+ breaks and following the range break showing new momentum in the stock. 
+ Price target  :  We look for a standard 2:1 reward to  risk on range break trades 
+ Second Chance Trades (break and retest trades): 
+ Following the initial break of range, we look for a “retracement” to the breakout point of the range and we look for a 
+ “TURN” candle. 
+ Stop  is placed .2 below the low of the “Turn” candle 
+ Entry  is on the first candle that closes in the direction of the range break following the “retest” of   the 
+ breakout level. 
+ Price Targets  : we take initial profit (½) our position  at the prior high and trail stop with position 
+ Failed Break out of Range 
+ Price attempts to break the range, and even breaks the range, but the price action does not support the 
+ movement. Price trades back into the prior range creating a Failed Break Out. . 
+ Stop  is placed .02 below the low of the failed break  down. 
+ Entry  is on the first bar that closes away from  range that was broken. 
+ Price Target  is the other end of the range. 

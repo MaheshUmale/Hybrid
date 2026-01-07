@@ -1,0 +1,10 @@
+{
+  "pdf": "Gap_Give_and_Go_Cheat_Sheet.pdf",
+  "strategy": "Gap Give & Go",
+  "entry": "Enter on range break after gap or on initial break; enter immediately (don't wait for bar close).",
+  "stop": "Place stop 0.02 below consolidation low (measured).",
+  "target": "Measured move target; default 2:1 R:R.",
+  "confirmations": ["Volume spike on breakout","VWAP and 9 EMA alignment"],
+  "trailing": "Allow re-entry if range breaks again within ~3 minutes; trail to VWAP/EMA after partials.",
+  "notes": "Implement re-entry cooldown and RVol check; PDF contains image annotations."
+}

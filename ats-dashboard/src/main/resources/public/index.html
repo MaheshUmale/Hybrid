@@ -212,13 +212,14 @@
             <table id="active-table">
                 <thead>
                     <tr>
+                        <th>Entry Time</th>
                         <th>Symbol</th>
+                        <th>Strategy</th>
                         <th>Side</th>
                         <th>Qty</th>
                         <th>Entry</th>
                         <th>LTP</th>
-                        <th>Unrealized PnL</th>
-                        <th>Reason</th>
+                        <th>PnL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -238,13 +239,15 @@
             <table id="history-table">
                 <thead>
                     <tr>
-                        <th>Time</th>
-                        <th>Symbol</th>
-                        <th>Side</th>
                         <th>Entry</th>
                         <th>Exit</th>
-                        <th>Realized PnL</th>
-                        <th>Reason</th>
+                        <th>Symbol</th>
+                        <th>Strategy</th>
+                        <th>Side</th>
+                        <th>Buy Pr</th>
+                        <th>Sell Pr</th>
+                        <th>Net PnL</th>
+                        <th>Exit Reason</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -301,7 +304,12 @@
         }
 
         function formatTime(ts) {
-            return new Date(ts).toLocaleTimeString('en-IN', { hour12: false });
+            const date = new Date(ts);
+            // Show DD/MM HH:mm:ss for clarity
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const time = date.toLocaleTimeString('en-IN', { hour12: false });
+            return `${day}/${month} ${time}`;
         }
 
         function render(data) {
@@ -327,18 +335,19 @@
 
                     activeHtml += `
                         <tr>
+                            <td style="color:var(--text-secondary)">${formatTime(t.entryTime)}</td>
                             <td>${t.symbol}</td>
+                            <td style="font-size:0.85em; color:var(--text-secondary)">${t.strategy || 'MANUAL'}</td>
                             <td><span class="tag ${side}">${side}</span></td>
                             <td>${t.qty}</td>
                             <td>${t.entry.toFixed(2)}</td>
                             <td class="${priceClass}">${t.ltp.toFixed(2)}</td>
                             <td class="${pnlClass}" style="font-weight:bold">${formatCurrency(t.pnl)}</td>
-                            <td style="font-size:0.85em; color:var(--text-secondary)">${t.reason}</td>
                         </tr>
                     `;
                 });
             }
-            els.activeBody.innerHTML = activeHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-secondary)">No active positions</td></tr>';
+            els.activeBody.innerHTML = activeHtml || '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-secondary)">No active positions</td></tr>';
             els.activeSum.textContent = formatCurrency(activeSum);
             els.activeSum.className = activeSum >= 0 ? 'text-green' : 'text-red';
 
@@ -355,11 +364,14 @@
                     totalRealized += t.pnl;
                     count++;
                     const pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+                    const isBuySide = t.side.includes("BUY");
 
                     historyHtml += `
                         <tr>
-                            <td style="color:var(--text-secondary)">${formatTime(t.exitTime)}</td>
+                            <td style="color:var(--text-secondary)">${formatTime(t.entryTime)}</td>
+                            <td style="color:var(--text-secondary); font-weight:bold">${formatTime(t.exitTime)}</td>
                             <td>${t.symbol}</td>
+                            <td style="font-size:0.85em; color:var(--text-secondary)">${t.strategy || 'MANUAL'}</td>
                             <td><span class="tag ${t.side}">${t.side}</span></td>
                             <td>${t.entry.toFixed(2)}</td>
                             <td>${t.exit.toFixed(2)}</td>
@@ -369,7 +381,7 @@
                     `;
                 });
             }
-            els.historyBody.innerHTML = historyHtml || '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-secondary)">No completed trades yet</td></tr>';
+            els.historyBody.innerHTML = historyHtml || '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-secondary)">No completed trades yet</td></tr>';
             els.totalPnl.textContent = formatCurrency(totalRealized);
             els.totalPnl.style.color = totalRealized >= 0 ? 'var(--text-green)' : 'var(--text-red)';
             els.count.textContent = `${count} Trades`;

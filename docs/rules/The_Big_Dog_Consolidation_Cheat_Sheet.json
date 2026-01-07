@@ -1,0 +1,10 @@
+{
+  "pdf": "The_Big_Dog_Consolidation_Cheat_Sheet.pdf",
+  "strategy": "Big Dog Consolidation (Wedge/Flag/Pennant)",
+  "entry": "Enter on breakout of consolidation pattern (wedge, flag, pennant) with high relative volume.",
+  "stop": "Hard stop ~0.02 below base of the pattern.",
+  "target": "Measured move from pattern base; default 2:1 R:R or pattern-specific target.",
+  "confirmations": ["Crescendo volume at pattern start","Volume drop inside consolidation"],
+  "trailing": "Partial at first target; trail remaining leg to EMA/VWAP.",
+  "notes": "Pattern detection helper recommended; may require manual review or pattern algorithm."
+}

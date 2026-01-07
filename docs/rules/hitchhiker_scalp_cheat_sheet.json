@@ -1,0 +1,10 @@
+{
+  "pdf": "hitchhiker_scalp_cheat_sheet.pdf",
+  "strategy": "Hitchhiker Scalp",
+  "entry": "Enter on range-breaking bar; this is a 'one-and-done' trade (do not stack).",
+  "stop": "Hard stop placed ~0.02 below consolidation low.",
+  "target": "Quick measured target; partial one-take profit is typical.",
+  "confirmations": ["30%+ volume increase vs prior candle","RVol elevated"],
+  "trailing": "No trailing — prefer single hit target.",
+  "notes": "Enforce single trade token per identified opportunity."
+}

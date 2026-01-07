@@ -43,6 +43,25 @@
 
 **Recommendation:** These test files can remain as they serve as integration verification. Add to `.gitignore` if they contain sensitive tokens.
 
+### 5. Trading Strategy Optimization (ScalpingSignalEngine.java)
+**Goal:** Address "net negative" performance and high `TECH_SL_HIT` rate using backtest findings.
+
+**Optimizations Implemented:**
+- **STUFF_S (Short Rejection):**
+  - Widened Stop Loss: `0.1 * ATR` -> `0.25 * ATR`
+  - Added Volume Filter: `VolRatio > 1.5`
+- **CRUSH_L (Long Rejection):**
+  - Widened Stop Loss: `0.1 * ATR` -> `0.25 * ATR`
+  - Added Volume Filter: `VolRatio > 1.5`
+  - Relaxed entry filter: `Close > VWAP` OR `Close > EMA20`
+- **ORB_S (Short Breakout):**
+  - Tightened Stop Loss: Used `ORB_Low + 0.5 * ATR` (replacing midpoint logic)
+  - Added Volume Filter: `VolRatio > 1.2`
+- **LATE_SQ (Late Squeeze):**
+  - Stricter Volume Requirement: `VolRatio > 5.0` (was 3.0) to filter chop.
+
+**Status:** ✅ Implemented and Built Successfully (ats-core).
+
 ## 📊 Code Quality Metrics
 
 ### Lines of Code

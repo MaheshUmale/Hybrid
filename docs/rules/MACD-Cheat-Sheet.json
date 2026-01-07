@@ -1,0 +1,10 @@
+{
+  "pdf": "MACD-Cheat-Sheet.pdf",
+  "strategy": "MACD Scalp",
+  "entry": "Enter when Fast MACD crosses above Slow MACD and both are above zero.",
+  "stop": "Hard stop ~0.02 below retracement low; exit if Fast MACD crosses back below Slow.",
+  "target": "Hold until Fast MACD crosses below Slow; alternatively use measured move TP.",
+  "confirmations": ["MACD momentum","Volume confirmation"],
+  "trailing": "Exit when Fast MACD crosses back below Slow (dynamic trailing).",
+  "notes": "Requires MACD indicator (fast/slow). Implement in indicators module or fetch from bridge."
+}

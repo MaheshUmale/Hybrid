@@ -1,0 +1,66 @@
+Why The Fashionably Late Scalp Works:
+● Momentum is a term used to describe a growing energy, building to carry an object in the direction of that momentum.
+○ In terms of trading, at the lows of a move, the “momentum” is completely against a stock, but as it begins its
+ascent, momentum can begin to build, and the likelihood of a stock continuing in a direction (trend) grows as
+the momentum grows.
+● The Fashionably Late Scalp takes advantage of real momentum by allowing the momentum to build in the direction of
+the trend, then capturing the momentum at a pivotal point in the way the stock is trading.
+○ We use a unique type of divergence, followed by convergence, to observe the shift and building of
+momentum, and then capture the momentum that will continue in the stock as the 9 EMA (a short-term,
+exponential moving average), crosses above VWAP (a volume-weighted moving average).
+● In the Fashionably Late Scalp, we allow the momentum to build for us, we identify a key moment in the scalp,
+and we act to take full advantage of the beautiful principle of momentum.
+The exact rules of entry (all rules the exact same but inverted for short scalps):
+When an upsloping 9 EMA crosses a flat to downsloping VWAP, we enter the trade long.
+● We enter the trade as soon as the cross occurs.
+● This cross is our visual signal for the trade to keep going in our direction.
+The exact rules of stop placement:
+For this scalp, we use a measured move to calculate our stop and our target.
+● In trading, a measured move is a technical analysis tool used to identify a stock's price movement following a
+significant change in the stock. It offers insight into the potential move.
+Traders often use measured moves to set profit-taking targets and to
+set risk levels for stops because it can be used as a guide to show
+how appropriate the pattern is.
+○ Identify the low of the day and where the 9 EMA crosses VWAP
+○ Measure this initial move
+○ Use the measured move to set both a stop and target for this scalp
+● Hard stop 1/3 the distance from Vwap to the Low of the day.
+● This is a trade where the momentum should be on our side and keep moving
+quickly, so our stop stays tight, relative to the reward we are seeing.
+The exact rules of exit:
+We exit this trade using a measured move
+● Take the measured move from the low of the day to the spot of the “cross”.
+○ Target 1 measured move above the cross.
+
+
+The factors that increase the probability of this scalp working as expected (or better):
+● If the volume bars during the convergence >volume bars during the divergence
+○ If price moves away from vwap on less volume than when price is moving back towards vwap it signals
+participation and sustained demand in the form of a buy program that is creating a great environment for this
+trade. It increases the probability of this trade working as the buy program is likely going to be sustained.
+● Speed of the price action following the “turn” off the low of the day
+○ Speed just shows us the commitment of the buyers after the turn is put in. If the buyers are sustaining, we
+can expect and look for a steady convergence back to vwap. Steady is best here, steady can tell us the real
+momentum is on our side and likely to sustain and even accelerate later in the scalp. The best measure of
+speed can be to observe how the price action is holding above the 9 EMA after crossing back above it
+following the “turn”.
+○ This shows us the commitment of the buyers and the sustainability of that commitment.
+The factors that decrease the probability of this scalp working:
+● Choppy, slow price action following the “turn”
+○ “Choppy” price action refers to a trading condition where prices move erratically. Prices frequently reverse
+direction, and while they may appear to indicate a directional move, that move is unlikely to sustain a clear
+trend. Choppy price action is often referred to as “Noise” in trading because the price action is exhibiting
+volatility but not making substantial gains or losses over a specified period.
+● Time spent around the point where the 9 EMA should cross VWAP
+○ A significant pause before our entry trigger can show a lack of commitment from the buyers and can lower
+the probability of this scalp moving in our favor quickly and cleanly.
+When do we avoid this scalp entirely:
+● We will never make this scalp when price action goes “flat” and choppy.
+○ If the 9 EMA has gone flat (completely horizontal) for a period of time of more than 15 minutes after the turn
+but before our entry, we don’t take this scalp, It may be a different scalp entirely.
+The ideal times of day to take the scalp:
+● Morning (10:00 – 10:45 am EST)
+● Mid-Day (10:46-1:30 am EST)
+Scalp Statistics:
+●60% win rate
+●3 to 1 Reward to Risk ratio

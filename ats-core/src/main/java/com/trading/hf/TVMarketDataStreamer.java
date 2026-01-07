@@ -22,18 +22,24 @@ public class TVMarketDataStreamer {
     private final Consumer<VolumeBar> barConsumer;
     private final OptionChainProvider optionChainProvider;
     private final MarketBreadthEngine breadthEngine;
+    private final String url;
     private WebSocketClient webSocketClient;
     private final Gson gson = new Gson();
 
     public TVMarketDataStreamer(Consumer<VolumeBar> barConsumer, OptionChainProvider ocp, MarketBreadthEngine mbe) {
+        this(barConsumer, ocp, mbe, "ws://localhost:8765");
+    }
+
+    public TVMarketDataStreamer(Consumer<VolumeBar> barConsumer, OptionChainProvider ocp, MarketBreadthEngine mbe, String url) {
         this.barConsumer = barConsumer;
         this.optionChainProvider = ocp;
         this.breadthEngine = mbe;
+        this.url = url;
     }
 
     public void connect() {
         try {
-            URI serverUri = new URI("ws://localhost:8765");
+            URI serverUri = new URI(this.url);
             this.webSocketClient = new WebSocketClient(serverUri) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
@@ -96,12 +102,21 @@ public class TVMarketDataStreamer {
         double close = m1.get("close").getAsDouble();
         long volume = m1.get("volume").getAsLong();
         double vwap = m1.has("vwap") ? m1.get("vwap").getAsDouble() : close;
-        
+                // Inside processCandle method
+        double delta = m1.has("delta") ? m1.get("delta").getAsDouble() : 0.0;
+        if (delta == 0.0) {
+            // Fallback logic: assume all volume is buy if close >= open, else sell
+            delta = (close >= open) ? volume : -volume;
+        }   
         // Map to internal symbol format
         String prefix = (symbol.equals("NIFTY") || symbol.equals("BANKNIFTY")) ? "NSE_INDEX|" : "NSE_EQ|";
         String fullSymbol = prefix + symbol;
         if ("NIFTY".equals(symbol)) fullSymbol = "NSE_INDEX|Nifty 50";
         if ("BANKNIFTY".equals(symbol)) fullSymbol = "NSE_INDEX|Nifty Bank";
+        
+        if ("NIFTY".equals(symbol) && ts % 300000 == 0) {
+            System.out.println("Processing Nifty candle at " + ts + " Close=" + close);
+        }
 
         // Create a VolumeBar directly from the candle data
         VolumeBar bar = new VolumeBar(fullSymbol, ts, open, volume);
@@ -109,6 +124,8 @@ public class TVMarketDataStreamer {
         bar.setLow(low);
         bar.setClose(close);
         bar.setVwap(vwap);
+        System.out.println("symbol :"+fullSymbol +"Setting cumulative volume delta: " + delta);
+        bar.setCumulativeVolumeDelta(delta); // Ensure VolumeBar has this setter
         
         if (data.has("pcr")) {
             bar.setPcr(data.get("pcr").getAsDouble());
@@ -117,6 +134,10 @@ public class TVMarketDataStreamer {
         // Pass to consumers
         if (optionChainProvider != null) {
             optionChainProvider.updateSpot(bar.getSymbol(), bar.getClose());
+            if (bar.getPcr() != 0.0) {
+                logger.debug("Received index candle with PCR={} for {}", bar.getPcr(), bar.getSymbol());
+                optionChainProvider.updateIndexPcr(bar.getSymbol(), bar.getPcr());
+            }
         }
 
         if (barConsumer != null) {
@@ -128,17 +149,35 @@ public class TVMarketDataStreamer {
         try {
             JsonArray chainData = jsonObject.getAsJsonArray("data");
             java.util.List<OptionChainDto> dtoList = new java.util.ArrayList<>();
-            
-            for (JsonElement el : chainData) {
-                JsonObject d = el.getAsJsonObject();
-                dtoList.add(new OptionChainDto(
-                    (int) d.get("strike").getAsDouble(),
-                    d.has("type") ? d.get("type").getAsString() : (d.has("call_oi") ? "CE" : "PE"), // Fallback if type missing
-                    0.0, // LTP - Python might not have it yet
-                    0.0, // OI Change %
-                    "NEUTRAL"
-                ));
-            }
+
+                logger.info("Received option_chain from bridge (entries={})", chainData.size());
+
+                int sample = 0;
+                for (JsonElement el : chainData) {
+                    JsonObject d = el.getAsJsonObject();
+                    int strike = (int) d.get("strike").getAsDouble();
+                    String type = d.has("type") ? d.get("type").getAsString() : (d.has("call_oi") ? "CE" : "PE");
+                    double ltp = d.has("ltp") ? d.get("ltp").getAsDouble() : 0.0;
+                    double oi = 0.0;
+                    if (d.has("oi")) oi = d.get("oi").getAsDouble();
+                    else if (d.has("call_oi") && "CE".equals(type)) oi = d.get("call_oi").getAsDouble();
+                    else if (d.has("put_oi") && "PE".equals(type)) oi = d.get("put_oi").getAsDouble();
+                    double oiChange = d.has("oi_change_pct") ? d.get("oi_change_pct").getAsDouble() : 0.0;
+
+                    if (sample < 5) {
+                        logger.debug("OptionChainEntry[{}] strike={} type={} ltp={} oi={} oiChange={}", sample, strike, type, ltp, oi, oiChange);
+                        sample++;
+                    }
+
+                    dtoList.add(new OptionChainDto(
+                        strike,
+                        type,
+                        ltp,
+                        oi,
+                        oiChange,
+                        "NEUTRAL"
+                    ));
+                }
             
             if (optionChainProvider != null) {
                 optionChainProvider.updateFromBridge(dtoList);

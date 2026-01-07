@@ -1,0 +1,10 @@
+{
+  "pdf": "The-Fashionably-Late-Scalp-Cheat-Sheet.pdf",
+  "strategy": "Fashionably Late (9EMA vs VWAP)",
+  "entry": "Enter when 9 EMA crosses VWAP (9 EMA upsloping crossing flat/down VWAP -> long). Enter immediately.",
+  "stop": "Measured move stop based on pivot or 0.02 below support.",
+  "target": "Measured move or 2:1 R:R.",
+  "confirmations": ["VWAP alignment","9 EMA slope","Volume confirmation"],
+  "trailing": "Move stop to breakeven after partial; trail to VWAP/EMA.",
+  "notes": "Implement VWAP + 9EMA gate; images contain annotated thresholds."
+}
