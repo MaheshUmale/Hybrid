@@ -18,3 +18,8 @@ bin/
 __pycache__/*
 __pycache__/*.pyc
 *.db
+*.bkp
+*.csv
+*.xlsx
+*.key
+*.pem
