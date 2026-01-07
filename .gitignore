@@ -9,3 +9,4 @@ bin/
 .settings
 .classpath
 .projectNSE.json
+*.db

@@ -19,10 +19,6 @@ public class DashboardViewModel {
     // Auction Profile
     public MarketProfileViewModel auctionProfile;
 
-    // Heavyweights
-    public List<HeavyweightViewModel> heavyweights;
-    public double weighted_delta;
-
     // Option Chain
     public List<OptionViewModel> optionChain;
 
@@ -33,23 +29,11 @@ public class DashboardViewModel {
     public List<ActiveTradeViewModel> active_trades;
     public List<ClosedTradeViewModel> closed_trades;
 
-    // Trade Panel
-    public double thetaGuard; // in seconds
-
     // Inner classes for nested structures
     public static class MarketProfileViewModel {
         public double vah;
         public double val;
         public double poc;
-    }
-
-    public static class HeavyweightViewModel {
-        public String name;
-        public double delta;
-        public String weight;
-        public double price;
-        public double change;
-        public long qtp;
     }
 
     public static class OptionViewModel {
