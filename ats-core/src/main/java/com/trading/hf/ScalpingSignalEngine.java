@@ -43,7 +43,7 @@ public class ScalpingSignalEngine {
 
     private PositionManager positionManager;
     private OptionChainProvider optionChainProvider;
-    private SignalEngine signalEngine;
+    
     private boolean autoExecute = false;
     private double riskPerTrade = 1000.0; // Default risk per trade
 
@@ -55,10 +55,10 @@ public class ScalpingSignalEngine {
     }
 
     public ScalpingSignalEngine(PositionManager positionManager, OptionChainProvider optionChainProvider,
-            SignalEngine signalEngine, boolean autoExecute) {
+             boolean autoExecute) {
         this.positionManager = positionManager;
         this.optionChainProvider = optionChainProvider;
-        this.signalEngine = signalEngine;
+        
         this.autoExecute = autoExecute;
         this.riskPerTrade = Double.parseDouble(ConfigLoader.getProperty("risk.per.trade", "1000.0"));
     }
@@ -256,9 +256,7 @@ public class ScalpingSignalEngine {
         double upperWick = high - Math.max(open, close);
         double lowerWick = Math.min(open, close) - low;
 
-        SignalEngine.AuctionState state = (signalEngine != null) ? signalEngine.getAuctionState(symbol)
-                : SignalEngine.AuctionState.ROTATION;
-
+ 
         // --- GROUP 13: MARKET MEMORY MODEL (MMM) ---
         if (ind.isDayTwoCandidate()) {
             double yHigh = ind.getYesterdayHigh();

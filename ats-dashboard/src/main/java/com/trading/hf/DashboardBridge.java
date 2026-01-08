@@ -14,8 +14,7 @@
  
      public static void start(
              VolumeBarGenerator volumeBarGenerator,
-             SignalEngine signalEngine,
-             AuctionProfileCalculator auctionProfileCalculator,
+             
              OptionChainProvider optionChainProvider,
              ScalpingSignalEngine scalpingSignalEngine,
              PositionManager positionManager
@@ -29,8 +28,7 @@
          }
  
          // Configure the static provider references for the update method
-         DashboardBridge.signalEngine = signalEngine;
-         DashboardBridge.auctionProfileCalculator = auctionProfileCalculator;
+         
       
          DashboardBridge.optionChainProvider = optionChainProvider;
          DashboardBridge.scalpingSignalEngine = scalpingSignalEngine;
@@ -39,8 +37,6 @@
          volumeBarGenerator.setDashboardConsumer(DashboardBridge::onVolumeBar);
      }
  
-     private static SignalEngine signalEngine;
-     private static AuctionProfileCalculator auctionProfileCalculator;
   
      private static OptionChainProvider optionChainProvider;
      private static ScalpingSignalEngine scalpingSignalEngine;
@@ -71,17 +67,7 @@
          viewModel.ohlc.low = volumeBar.getLow();
          viewModel.ohlc.close = volumeBar.getClose();
  
-         // 2. Populate Auction Profile
-         if (auctionProfileCalculator != null) {
-             AuctionProfileCalculator.MarketProfile profile = auctionProfileCalculator.getProfile(volumeBar.getSymbol());
-             if (profile != null) {
-                 viewModel.auctionProfile = new DashboardViewModel.MarketProfileViewModel();
-                 viewModel.auctionProfile.vah = profile.getVah();
-                 viewModel.auctionProfile.val = profile.getVal();
-                 viewModel.auctionProfile.poc = profile.getPoc();
-             }
-         }
- 
+     
 
          // 4. Populate Option Chain
          if (optionChainProvider != null) {
@@ -98,11 +84,7 @@
                      .collect(Collectors.toList());
          }
  
-         // 5. Populate Sentiment & Alerts
-         if (signalEngine != null) {
-             SignalEngine.AuctionState auctionState = signalEngine.getAuctionState(volumeBar.getSymbol());
-             viewModel.auctionState = (auctionState != null) ? auctionState.toString() : "ROTATION";
-         }
+       
          viewModel.alerts = new ArrayList<>();
  
          // 6. Populate Scalping Signals

@@ -13,19 +13,18 @@ public class Main {
         
         // Initialize Listeners
         PositionManager positionManager = new PositionManager();
-        AuctionProfileCalculator auctionProfileCalculator = new AuctionProfileCalculator();
-        OptionChainProvider optionChainProvider = new OptionChainProvider(positionManager);
-        SignalEngine signalEngine = new SignalEngine(auctionProfileCalculator);
-        ScalpingSignalEngine scalpingSignalEngine = new ScalpingSignalEngine(positionManager, optionChainProvider, signalEngine, true);
         
-        InstrumentMaster instrumentMaster = new InstrumentMaster("instrument-master.json");
+        OptionChainProvider optionChainProvider = new OptionChainProvider(positionManager);
+        
+        ScalpingSignalEngine scalpingSignalEngine = new ScalpingSignalEngine(positionManager, optionChainProvider,  true);
+        
+        //InstrumentMaster instrumentMaster = new InstrumentMaster("instrument-master.json");
         MarketBreadthEngine marketBreadthEngine = new MarketBreadthEngine();
         
         long volumeThreshold = Long.parseLong(ConfigLoader.getProperty("volume.threshold", "1000"));
         
         java.util.function.Consumer<VolumeBar> barHandler = bar -> {
-            auctionProfileCalculator.onVolumeBar(bar);
-            signalEngine.onVolumeBar(bar);
+            
             scalpingSignalEngine.onVolumeBar(bar);
             if (dashboardEnabled) DashboardBridge.onVolumeBar(bar);
         };
@@ -36,8 +35,7 @@ public class Main {
         if (dashboardEnabled) {
             DashboardBridge.start(
                 volumeBarGenerator,
-                signalEngine,
-                auctionProfileCalculator, 
+                
                 optionChainProvider,
                 scalpingSignalEngine,
                 positionManager
