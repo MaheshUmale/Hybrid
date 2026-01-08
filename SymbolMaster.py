@@ -107,15 +107,16 @@ class SymbolMaster:
             for _, row in df_filtered.iterrows():
                 # Clean name: "Nifty 50" -> "NIFTY", "RELIANCE" -> "RELIANCE"
                 # Some might be "RELIANCE-EQ" or similar, usually trading_symbol is clean for equities
-                name = row['trading_symbol'].upper() 
-                key = row['instrument_key'] 
-                
+                name = row['trading_symbol'].upper()
+                key = row['instrument_key']
+                segment = row['segment']
+
                 self._mappings[name] = key
-                self._reverse_mappings[key] = name
-                
+                self._reverse_mappings[key] = (name, segment)
+
                 # Special Handling for Indices (trading_symbol might be specific)
                 # For NSE_INDEX, name is often "Nifty 50", trading_symbol "Nifty 50"
-                if row['segment'] == 'NSE_INDEX':
+                if segment == 'NSE_INDEX':
                     if row['name'] == "Nifty 50" or row['trading_symbol'] == "Nifty 50":
                         self._mappings["NIFTY"] = key
                     elif row['name'] == "Nifty Bank" or row['trading_symbol'] == "Nifty Bank":
@@ -143,14 +144,16 @@ class SymbolMaster:
         """
         if not self._initialized:
             self.initialize()
-        
-        # 1. Direct Match
-        if symbol.upper() in self._mappings:
-            return self._mappings[symbol.upper()]
-        
-        # 2. Try adding -EQ extension common in some systems
-        # N/A for now
-        
+
+        # 1. Handle unified format
+        s_upper = symbol.upper()
+        if s_upper.startswith("NSE|INDEX|"):
+            s_upper = s_upper.split('|')[-1]
+
+        # 2. Direct Match
+        if s_upper in self._mappings:
+            return self._mappings[s_upper]
+
         return None
 
     def get_ticker_from_key(self, key):
@@ -161,15 +164,24 @@ class SymbolMaster:
             key (str): Upstox instrument key (e.g., 'NSE_EQ|INE002A01018')
             
         Returns:
-            str: Trading symbol or the original key if not found
+            str: Trading symbol (unified for indices) or the original key if not found
             
         Example:
             >>> MASTER.get_ticker_from_key('NSE_INDEX|Nifty 50')
-            'NIFTY'
+            'NSE|INDEX|NIFTY'
         """
         if not self._initialized:
             self.initialize()
-        return self._reverse_mappings.get(key, key)
+        if key in self._reverse_mappings:
+            name, segment = self._reverse_mappings[key]
+            if segment == 'NSE_INDEX':
+                if name == "NIFTY 50":
+                    return "NSE|INDEX|NIFTY"
+                if name == "NIFTY BANK":
+                    return "NSE|INDEX|BANKNIFTY"
+            return name
+
+        return key
 
 # Singleton Instance
 MASTER = SymbolMaster()
