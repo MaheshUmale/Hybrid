@@ -10,8 +10,16 @@ public class SignalFactory {
             double tp,
             long marketTime,
             double score) {
-        ScalpingSignalEngine.ScalpSignal signal = new ScalpingSignalEngine.ScalpSignal(symbol, gate, entry, sl, tp, marketTime);
-        signal.playbookScore = score;
-        return signal;
+       
+        if ( sl < tp ) {
+            ScalpingSignalEngine.ScalpSignal signal = new ScalpingSignalEngine.ScalpSignal(symbol, "BUY", gate, entry, sl, tp, marketTime);
+            signal.playbookScore = score;
+            return signal;
+        } else {
+            ScalpingSignalEngine.ScalpSignal signal = new ScalpingSignalEngine.ScalpSignal(symbol, "SELL", gate, entry, sl, tp, marketTime);
+            signal.playbookScore = score;
+            return signal;
+        }
+       
     }
 }

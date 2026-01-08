@@ -40,7 +40,7 @@ public class OptionChainProvider implements MarketEventListener {
             if ("NSE_INDEX|Nifty 50".equals(symbol)) {
                 spotPrice.set(event.getLtp());
             }
-        } else if (symbol.contains(" CE") || symbol.contains(" PE")) {
+        } else if (symbol.contains("CE") || symbol.contains("PE")) {
             optionState.put(symbol, event);
             if (positionManager != null) {
                 positionManager.updateLtp(symbol, event.getLtp());
@@ -121,6 +121,13 @@ public class OptionChainProvider implements MarketEventListener {
         positionManager.updateLtp(peSymbol, pePrice);
     }
 
+    public double getLtpForSymbol(String symbol) {
+        MarketEvent event = optionState.get(symbol);
+        if (event != null) {
+            return event.getLtp();
+        }
+        return 0.0;
+    }
     public OptionData getAtmOption(String indexSymbol, String side) {
         Double spot = indexSpots.get(indexSymbol);
         if (spot == null || spot <= 0) return null;

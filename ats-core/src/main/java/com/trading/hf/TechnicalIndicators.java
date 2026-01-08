@@ -159,12 +159,12 @@ public class TechnicalIndicators {
     public double getYesterdayClose() { return yesterdayClose; }
     public boolean isYesterdayReversal() { return isYesterdayReversal; }
 
-    public void setYesterdayStats(double high, double low, double close, boolean reversal) {
-        this.yesterdayHigh = high;
-        this.yesterdayLow = low;
-        this.yesterdayClose = close;
-        this.isYesterdayReversal = reversal;
-    }
+    // public void setYesterdayStats(double high, double low, double close, boolean reversal) {
+    //     this.yesterdayHigh = high;
+    //     this.yesterdayLow = low;
+    //     this.yesterdayClose = close;
+    //     this.isYesterdayReversal = reversal;
+    // }
 
     public double getSessionHigh() { return sessionHigh; }
     public double getSessionLow() { return sessionLow; }
@@ -175,5 +175,25 @@ public class TechnicalIndicators {
     public double getMacdSignal() { return macdSignal; }
     public double getPrevMacdSignal() { return prevMacdSignal; }
     public double getMacdHist() { return macdHist; }
+
+    private boolean isDayTwoCandidate = false;
+
+    public boolean isDayTwoCandidate() { return isDayTwoCandidate; }
+
+    public void setYesterdayStats(double high, double low, double close, boolean reversal) {
+        this.yesterdayHigh = high;
+        this.yesterdayLow = low;
+        this.yesterdayClose = close;
+        this.isYesterdayReversal = reversal;
+
+        // MMM Step 1: Logic to identify "Big Candle" Day Two Names
+        // Criteria: Yesterday's range > 1.5% of price OR > 2.0x ATR
+        double bodySize = Math.abs(high - low);
+        if (close > 0) {
+            double pctMove = (bodySize / close) * 100;
+            // Flag as Day Two if move was > 1.5% (suggests forced participation)
+            this.isDayTwoCandidate = pctMove > 1.5; 
+        }
+    }
 }
 
