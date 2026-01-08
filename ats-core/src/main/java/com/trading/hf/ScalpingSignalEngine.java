@@ -623,7 +623,7 @@ public class ScalpingSignalEngine {
         double targetTp = signal.takeProfit;
 
         // Handle Index -> ATM Option Conversion
-        if (symbolToTrade.startsWith("NSE_INDEX|") && optionChainProvider != null) {
+        if (symbolToTrade.startsWith("NSE|INDEX|") && optionChainProvider != null) {
             OptionChainProvider.OptionData opt = optionChainProvider.getAtmOption(symbolToTrade, side);
 
             if (opt != null) {
@@ -646,10 +646,9 @@ public class ScalpingSignalEngine {
                 targetSl = entryPrice * (1.0 - optionSlPct);
                 targetTp = entryPrice * (1.0 + optionTpPct);
 
-                boolean isSynthetic = symbolToTrade != null && symbolToTrade.startsWith("NSE_SYNTH|");
                 logger.info(
-                        ">>> VERIFIED MAPPING: Index {} ({}) -> Option {} @ {} SL: {} TP: {} (synthetic={})",
-                        signal.symbol, signal.gate, symbolToTrade, entryPrice, targetSl, targetTp, isSynthetic);
+                        ">>> VERIFIED MAPPING: Index {} ({}) -> Option {} @ {} SL: {} TP: {}",
+                        signal.symbol, signal.gate, symbolToTrade, entryPrice, targetSl, targetTp);
 
                 // --- ADVANCED INDEX OPTION HEURISTICS ---
                 try {
@@ -883,14 +882,6 @@ public class ScalpingSignalEngine {
                 // trailing SL
                 try {
                     TechnicalIndicators indLocal = indicatorsMap.get(symbol);
-                    if (indLocal == null) {
-                        // Try to find indicators by stripping option prefix if present (e.g.,
-                        // NSE_SYNTH|NIFTY->NIFTY)
-                        String base = symbol;
-                        if (symbol.contains("|"))
-                            base = symbol.substring(symbol.indexOf('|') + 1);
-                        indLocal = indicatorsMap.get(base);
-                    }
                     if (indLocal == null) {
                         // No indicators available; skip trailing update
                     } else {

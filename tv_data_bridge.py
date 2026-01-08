@@ -103,8 +103,8 @@ class TVCandleBridge:
                         chain = await loop.run_in_executor(None, fetch_live_snapshot, sym)
                         
                         if chain:
-                            # Map to internal format
-                            full_sym = "NSE_INDEX|Nifty 50" if sym == "NIFTY" else "NSE_INDEX|Nifty Bank"
+                            # Unify symbol format
+                            full_sym = "NSE|INDEX|NIFTY" if sym == "NIFTY" else "NSE|INDEX|BANKNIFTY"
                             msg = {
                                 "type": "option_chain",
                                 "symbol": full_sym,
