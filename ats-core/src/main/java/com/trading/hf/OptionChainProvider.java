@@ -35,9 +35,9 @@ public class OptionChainProvider implements MarketEventListener {
         String symbol = event.getSymbol();
         if (symbol == null) return;
 
-        if (symbol.startsWith("NSE_INDEX|")) {
+        if (symbol.startsWith("NSE|INDEX|")) {
             indexSpots.put(symbol, event.getLtp());
-            if ("NSE_INDEX|Nifty 50".equals(symbol)) {
+            if ("NSE|INDEX|NIFTY".equals(symbol)) {
                 spotPrice.set(event.getLtp());
             }
         } else if (symbol.contains("CE") || symbol.contains("PE")) {
@@ -48,13 +48,13 @@ public class OptionChainProvider implements MarketEventListener {
         }
         
         // Generate Synthetic Option Prices from Spot for Backtesting if Data Missing
-        if (symbol.startsWith("NSE_INDEX|") && indexSpots.containsKey(symbol)) {
+        if (symbol.startsWith("NSE|INDEX|") && indexSpots.containsKey(symbol)) {
             updateSyntheticOptions(symbol, event.getLtp());
         }
     }
 
     public void updateSpot(String symbol, double price) {
-        if (symbol.startsWith("NSE_INDEX|")) {
+        if (symbol.startsWith("NSE|INDEX|")) {
              indexSpots.put(symbol, price);
              // Also update synthetic options immediately
              updateSyntheticOptions(symbol, price);
@@ -63,7 +63,7 @@ public class OptionChainProvider implements MarketEventListener {
 
     public void updateIndexPcr(String symbol, double pcr) {
         if (symbol == null) return;
-        if (symbol.startsWith("NSE_INDEX|")) {
+        if (symbol.startsWith("NSE|INDEX|")) {
             Double current = indexPcr.get(symbol);
             if (current != null) prevIndexPcr.put(symbol, current);
             indexPcr.put(symbol, pcr);
@@ -102,12 +102,10 @@ public class OptionChainProvider implements MarketEventListener {
         int atmStrike = (int) (Math.round(spot / strikeDiff) * strikeDiff);
         
         // Synthetic Base Name Logic
-        String baseName = indexSymbol.replace("NSE_INDEX|", "").replace(" ", "").toUpperCase();
-        if (baseName.equals("NIFTY50")) baseName = "NIFTY";
-        if (baseName.equals("BANKNIFTY")) baseName = "BANKNIFTY"; // Standardize
+        String baseName = indexSymbol.split("\\|")[2];
         
-        String ceSymbol = "NSE_SYNTH|" + baseName + atmStrike + "CE";
-        String peSymbol = "NSE_SYNTH|" + baseName + atmStrike + "PE";
+        String ceSymbol = String.format("NSE|OPTION|%s_%d_CE", baseName, atmStrike);
+        String peSymbol = String.format("NSE|OPTION|%s_%d_PE", baseName, atmStrike);
         
         // Use a realistic premium (e.g., 0.5% of spot)
         double premium = spot * 0.005;
@@ -139,6 +137,9 @@ public class OptionChainProvider implements MarketEventListener {
         
         // 1. Try Injected Chain from Bridge (High Priority in Live)
         List<OptionChainDto> injected = injectedChain.get();
+        String baseName = indexSymbol.split("\\|")[2];
+        String unifiedSymbol = String.format("NSE|OPTION|%s_%d_%s", baseName, atmStrike, type);
+
         if (injected != null && !injected.isEmpty()) {
             OptionChainDto match = injected.stream()
                 .filter(d -> d.getStrike() == atmStrike && type.equals(d.getType()))
@@ -146,12 +147,8 @@ public class OptionChainProvider implements MarketEventListener {
                 .orElse(null);
             
             if (match != null && match.getLtp() > 0) {
-                // Construct a symbolic name for the bridge-provided option
-                String baseName = indexSymbol.replace("NSE_INDEX|", "").replace(" ", "").toUpperCase();
-                if (baseName.equals("NIFTY50")) baseName = "NIFTY";
-                String symbol = "NSE_OPT|" + baseName + atmStrike + type;
-                logger.debug("Found ATM option in injected chain: {} @ {}", symbol, match.getLtp());
-                return new OptionData(symbol, match.getLtp());
+                logger.debug("Found ATM option in injected chain: {} @ {}", unifiedSymbol, match.getLtp());
+                return new OptionData(unifiedSymbol, match.getLtp());
             }
         }
 
@@ -168,17 +165,12 @@ public class OptionChainProvider implements MarketEventListener {
         if (realOpt != null && realOpt.ltp > 0) return realOpt;
         
         // 3. Return Synthetic using the same realistic model
-        String baseName = indexSymbol.replace("NSE_INDEX|", "").replace(" ", "").toUpperCase();
-        if (baseName.equals("NIFTY50")) baseName = "NIFTY";
-        if (baseName.equals("BANKNIFTY")) baseName = "BANKNIFTY";
-        
-        String synthSymbol = "NSE_SYNTH|" + baseName + atmStrike + type;
         double premium = spot * 0.005;
         double intrinsic = type.equals("CE") ? (spot - atmStrike) : (atmStrike - spot);
         double synthPrice = Math.max(5.0, intrinsic + premium);
         
-        logger.debug("Returning SYNTHETIC ATM option {} @ {} for index {} side={}", synthSymbol, synthPrice, indexSymbol, side);
-        return new OptionData(synthSymbol, synthPrice);
+        logger.debug("Returning SYNTHETIC ATM option {} @ {} for index {} side={}", unifiedSymbol, synthPrice, indexSymbol, side);
+        return new OptionData(unifiedSymbol, synthPrice);
     }
 
     public List<OptionChainDto> getOptionChainWindow() {

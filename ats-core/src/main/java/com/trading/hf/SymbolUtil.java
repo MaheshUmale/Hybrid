@@ -1,24 +1,27 @@
 package com.trading.hf;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class SymbolUtil {
 
-    private static final Pattern OPTION_SYMBOL_PATTERN = Pattern.compile("\\b(\\d{5})\\s(CE|PE)$");
-
     public static OptionSymbol parseOptionSymbol(String symbol) {
-        if (symbol == null) {
+        if (symbol == null || !symbol.startsWith("NSE|OPTION|")) {
             return null;
         }
 
-        Matcher matcher = OPTION_SYMBOL_PATTERN.matcher(symbol);
-        if (matcher.find()) {
-            int strike = Integer.parseInt(matcher.group(1));
-            String type = matcher.group(2);
+        try {
+            String[] parts = symbol.split("\\|");
+            if (parts.length != 3) return null;
+
+            String instrumentPart = parts[2];
+            String[] instrumentDetails = instrumentPart.split("_");
+            if (instrumentDetails.length != 3) return null;
+
+            int strike = Integer.parseInt(instrumentDetails[1]);
+            String type = instrumentDetails[2];
+
             return new OptionSymbol(strike, type);
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 
     public static class OptionSymbol {
