@@ -31,18 +31,13 @@ public class Main {
         };
 
         VolumeBarGenerator volumeBarGenerator = new VolumeBarGenerator(volumeThreshold, barHandler);
-
-        // Group Listeners
-        java.util.List<MarketEventListener> marketListeners = java.util.Arrays.asList(
-            optionChainProvider,
-            volumeBarGenerator
-        );
+ 
 
         if (dashboardEnabled) {
             DashboardBridge.start(
                 volumeBarGenerator,
                 signalEngine,
-                auctionProfileCalculator,
+                auctionProfileCalculator, 
                 optionChainProvider,
                 scalpingSignalEngine,
                 positionManager
