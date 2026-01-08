@@ -16,7 +16,7 @@ public class DashboardBridge {
             VolumeBarGenerator volumeBarGenerator,
             SignalEngine signalEngine,
             AuctionProfileCalculator auctionProfileCalculator,
-            IndexWeightCalculator indexWeightCalculator,
+            
             OptionChainProvider optionChainProvider,
             ScalpingSignalEngine scalpingSignalEngine,
             PositionManager positionManager
@@ -32,7 +32,7 @@ public class DashboardBridge {
         // Configure the static provider references for the update method
         DashboardBridge.signalEngine = signalEngine;
         DashboardBridge.auctionProfileCalculator = auctionProfileCalculator;
-        DashboardBridge.indexWeightCalculator = indexWeightCalculator;
+       
         DashboardBridge.optionChainProvider = optionChainProvider;
         DashboardBridge.scalpingSignalEngine = scalpingSignalEngine;
         DashboardBridge.positionManager = positionManager;
@@ -42,7 +42,7 @@ public class DashboardBridge {
 
     private static SignalEngine signalEngine;
     private static AuctionProfileCalculator auctionProfileCalculator;
-    private static IndexWeightCalculator indexWeightCalculator;
+    
     private static OptionChainProvider optionChainProvider;
     private static ScalpingSignalEngine scalpingSignalEngine;
     private static PositionManager positionManager;
@@ -83,22 +83,7 @@ public class DashboardBridge {
             }
         }
 
-        // 3. Populate Heavyweights
-        if (indexWeightCalculator != null) {
-            viewModel.heavyweights = indexWeightCalculator.getHeavyweights().values().stream()
-                    .map(hw -> {
-                        DashboardViewModel.HeavyweightViewModel hwvm = new DashboardViewModel.HeavyweightViewModel();
-                        hwvm.name = hw.getName();
-                        hwvm.weight = String.format("%.2f%%", hw.getWeight() * 100);
-                        hwvm.delta = hw.getDelta();
-                        hwvm.price = hw.getPrice();
-                        hwvm.change = (hw.getPrice() - hw.getPrevClose()) / hw.getPrevClose() * 100;
-                        hwvm.qtp = (long)hw.getVolume(); // Mapping volume to QTP for UI
-                        return hwvm;
-                    })
-                    .collect(Collectors.toList());
-            viewModel.weighted_delta = indexWeightCalculator.getAggregateWeightedDelta();
-        }
+        
 
         // 4. Populate Option Chain
         if (optionChainProvider != null) {

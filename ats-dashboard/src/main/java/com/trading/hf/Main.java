@@ -19,7 +19,6 @@ public class Main {
         ScalpingSignalEngine scalpingSignalEngine = new ScalpingSignalEngine(positionManager, optionChainProvider, signalEngine, true);
         
         InstrumentMaster instrumentMaster = new InstrumentMaster("instrument-master.json");
-        IndexWeightCalculator indexWeightCalculator = new IndexWeightCalculator("IndexWeights.json", instrumentMaster);
         MarketBreadthEngine marketBreadthEngine = new MarketBreadthEngine();
         
         long volumeThreshold = Long.parseLong(ConfigLoader.getProperty("volume.threshold", "1000"));
@@ -32,23 +31,13 @@ public class Main {
         };
 
         VolumeBarGenerator volumeBarGenerator = new VolumeBarGenerator(volumeThreshold, barHandler);
-
-        // ThetaExitGuard thetaExitGuard = new ThetaExitGuard(positionManager);
-
-        // // Group Listeners
-        // java.util.List<MarketEventListener> marketListeners = java.util.Arrays.asList(
-        //     indexWeightCalculator,
-        //     optionChainProvider,
-        //     volumeBarGenerator,
-        //     thetaExitGuard
-        // );
+ 
 
         if (dashboardEnabled) {
             DashboardBridge.start(
                 volumeBarGenerator,
                 signalEngine,
-                auctionProfileCalculator,
-                indexWeightCalculator,
+                auctionProfileCalculator, 
                 optionChainProvider,
                 scalpingSignalEngine,
                 positionManager
