@@ -41,7 +41,12 @@ def analyze_log(log_path):
         for line in f:
             if "[SIGNAL_DATA]" in line:
                 m = re.search(r"Gate=(.*?), Symbol=(.*?), Entry=([\d\.]+), SL=([\d\.]+), TP=([\d\.]+)", line)
-                if m: signals.append(m.groups())
+                if m:
+                    signals.append(m.groups())
+                else:
+                    m = re.search(r"\[SIGNAL_DATA\] Gate=(.*?), Symbol=(.*?), Entry=([\d\.]+), SL=([\d\.]+), TP=([\d\.]+), Score=([\d\.]+), Time=(\d+)", line)
+                    if m:
+                        signals.append(m.groups()[:5])
             
             if "[EXEC_DATA]" in line:
                 m = re.search(r"Side=(.*?), Symbol=(.*?), Qty=(\d+), Price=([\d\.]+), SL=([\d\.]+), TP=([\d\.]+), Gate=(.*)", line)
