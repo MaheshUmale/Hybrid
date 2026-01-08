@@ -16,8 +16,10 @@ public class Main {
         
         OptionChainProvider optionChainProvider = new OptionChainProvider(positionManager);
         
+        
         ScalpingSignalEngine scalpingSignalEngine = new ScalpingSignalEngine(positionManager, optionChainProvider,  true);
         
+
         //InstrumentMaster instrumentMaster = new InstrumentMaster("instrument-master.json");
         MarketBreadthEngine marketBreadthEngine = new MarketBreadthEngine();
         
